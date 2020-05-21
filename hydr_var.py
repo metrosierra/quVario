@@ -43,7 +43,8 @@ inf = 1000
 
 #Hamiltonian operator H operating on psi
 def H(psi):
-    ''' Function: the Hamiltonian operator operating on some trial function psi
+    ''' Function: the Hamiltonian operator operating on some trial function psi.
+    This is in atomic units. 
    
     Input: 
         some trial function psi(r)
@@ -172,4 +173,4 @@ initial_guess = 0.1
 alpha_op, energy_min = fmin(var_intgrl, initial_guess, (expectation_intgrl, norm_intgrl), 
               full_output = 1)[0:2]
 
-print('\nThe optimised parameter is %f. \nThe minimum energy is %f.' % (float(alpha_op),energy_min))
+print('\nIn atomic units, \nThe optimised parameter is %f. \nThe minimum energy is %f.' % (float(alpha_op),energy_min))
