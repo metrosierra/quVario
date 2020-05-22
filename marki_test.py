@@ -6,8 +6,6 @@
 
 ### READINGS IN readings FOLDER VERY USEFUL FOR HELIUM ATOM APPROXIMATIONS
 
-
-
 import math
 import sys
 import os
@@ -17,21 +15,26 @@ import numpy as np
 import scipy as sp
 import scipy.constants as sc
 import sympy as sy
-from sympy import conjugate, simplify, lambdify
+from sympy import conjugate, simplify, lambdify, sqrt
 from sympy import *
 from IPython.display import display
+from scipy import optimize, integrate
+
+import mcint
+import random
 
 
 class eiGen():
 
     def __init__(self):
-        hbar = sc.hbar
-        mass_e = sc.electron_mass
-        q = sc.elementary_charge
-        pi = sc.pi
-        perm = sc.epsilon_0
-        self.k = (q**2)/(4*pi*perm)
+        self.hbar = sc.hbar
+        self.mass_e = sc.electron_mass
+        self.q = sc.elementary_charge
+        self.pi = sc.pi
+        self.perm = sc.epsilon_0
+        self.k = (self.q**2)/(4*self.pi*self.perm)
         sy.init_printing()
+
         self.macro1()
 
     def spawn_electrons(self, number, coord_sys = 's'):
@@ -71,45 +74,97 @@ class eiGen():
 
     def expectation(self, psi, ham):
         pass
+# (self.hbar**2/(2*self.mass_e))
+# self.k *
+    #cylindrical coordinate helium atom hamiltonian
+    def hamiltonian_he(self, trial):
+        self.ke = -0.5 * (self.laplace(trial, 0) + self.laplace(trial, 1))
+        self.nucleus = -(2/self.r0 + 2/self.r1)
+        self.repel = -self.k * (-1/ sqrt(self.r0**2 + self.r1**2 - 2*self.r0*self.r1*cos(self.theta0)))
+
+        print('\nKinetic Energy terms (self.ke), Nucleus Attraction terms (self.nucleus), Electron Repulsion terms (self.repel) generated!!!\n')
+        return self.ke, self.nucleus, self.repel
 
 
-    def hamiltonian(self):
 
-        pass
+    def spawn_psi(self):
+        self.psi = -sy.exp(-self.alpha0*(self.r0 + self.r1))
+
+    def spawn_alphas(self, number):
+        for i in range(number):
+            setattr(self, 'alpha{}'.format(i), sy.symbols('alpha{}'.format(i), real = True))
+
+    def jacob_gen(self, index, dimensions = 3, type = 's'):
+        if dimensions == 3 and type == 's':
+            return self.bases[index][0]**2*sin(self.bases[index][1])
 
 
+    def symintegrate(self, expr, number):
+
+        for i in range(number):
+            dummy = sy.integrate(expr*self.jacob_gen(index = i), (self.bases[i][0], 0, oo), (self.bases[i][1], 0, pi),(self.bases[i][2], 0, 2*pi), conds = "none")
+            expr = dummy
+        return dummy
+
+    def scipy_integral(self, expr, variables, number = 2):
+        grand_jacob = 1
+        for i in range(number):
+            grand_jacob *= self.jacob_gen(index = i)
+        lamb = lambdify(variables, expr*grand_jacob, 'scipy')
+        print(lamb)
+        self.alpha0 = 2.0
+        integrand = integrate.nquad(lamb, [[0, sp.inf],  # r0
+                                            [0, sp.pi],   # theta0
+                                            [0, 2*sp.pi], # phi0
+                                            [0, sp.inf],   # r1
+                                            [0, sp.pi],   # theta1
+                                            [0, 2*sp.pi]], args = (self.alpha0,)) #phi1
 
 
-    def psi_trial(self):
-        alpha = sy.symbols('alpha', real = True)
-        self.psi = exp(-alpha(self.r1.r + self.r2.r))
-        pass
+        domainsize =
+
+        #
+        # random.seed(1)
+        # result, error = mcint.integrate(integrand, sampler(), measure=domainsize, n = 100000)
+
+        return integrand[0]
 
 
 
 
     def macro1(self):
 
-        alpha = sy.symbols('alpha', real = True)
+        self.spawn_alphas(2)
         self.spawn_electrons(2)
 
-        r0 = self.bases[0][0]
-        theta0 = self.bases[0][1]
-        phi0 = self.bases[0][2]
+        self.r0 = self.bases[0][0]
+        self.theta0 = self.bases[0][1]
+        self.phi0 = self.bases[0][2]
 
-        r1 = self.bases[1][0]
-        theta1 = self.bases[1][1]
-        phi1 = self.bases[1][2]
+        self.r1 = self.bases[1][0]
+        self.theta1 = self.bases[1][1]
+        self.phi1 = self.bases[1][2]
 
-        self.psi = sy.exp(-alpha*(r0 + r1))
-        jacobian = (r0**2)*sin(theta0)
+        self.spawn_psi()
+        ke, attract, repel = self.hamiltonian_he(self.psi)
 
-        self.integrand = conjugate(self.psi) * self.laplace(self.psi, 0) * jacobian
-        self.expectprime = sy.integrate(self.integrand, (theta0, 0, pi), (phi0, 0, 2*pi),(r0, 0, oo), (r1, 0, oo), conds="none")
-        self.normal = sy.integrate(conjugate(self.psi)*self.psi*jacobian, (theta0, 0, pi), (phi0, 0, 2*pi), (r0, 0, oo), (r1, 0, oo), conds="none")
-        self.expectfinal = self.expectprime / self.normal * 0.5
-        print(self.expectfinal)
+        normal = self.symintegrate(conjugate(self.psi)*self.psi, 2)
+        result1 = self.symintegrate(conjugate(self.psi)*ke, 2)
+        result2 = self.symintegrate(conjugate(self.psi)*attract*self.psi, 2)
+        display(result1/normal + result2/normal)
+        hydrogenic = lambdify((self.alpha0), result1/normal + result2/normal, 'scipy')
 
+        cross_term = simplify(conjugate(self.psi)*repel*self.psi/normal)
+
+        int_var = (self.r0, self.theta0, self.phi0, self.r1, self.theta1, self.phi1, self.alpha0)
+
+
+        initial_guess = 2.0
+        hi = optimize.fmin(hydrogenic, initial_guess)
+
+        hi2 = self.scipy_integral(cross_term, int_var)
+        # hi2 = optimize.fmin(self.scipy_integral, initial_guess, args = (cross_term, int_var))
+        print(hi2)
 
     def __enter__(self):
         pass
