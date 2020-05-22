@@ -1,0 +1,3 @@
+exp(-alpha * r)
+exp(-alpha * r **2)
+exp(-alpha * r **3) 
