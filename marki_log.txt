@@ -22,7 +22,7 @@ Initial parameter guess = 2.0
 Optimised parameter (atomic units) = [2.]
 Optimised function value (atomic units) = -4.0
 Number of iterations = 11
-Comments = (test run 3 without cross term, psi = -self.alpha0*(self.r0 + self.r1))
+Comments = (test run 3 without cross term, psi = -sy.exp(self.alpha0*(self.r0 + self.r1))
 
 ##########
 Datetime = 24/05/2020 01:06:25
@@ -31,7 +31,7 @@ Initial parameter guess = 2.0
 Optimised parameter (atomic units)= [1.6875]
 Optimised function value (atomic units)= -2.8476562498906066
 Number of iterations = 28
-Comments = test run 1 with cross term, psi = -self.alpha0*(self.r0 + self.r1)
+Comments = test run 1 with cross term, psi = -sy.exp(self.alpha0*(self.r0 + self.r1))
 
 ##########
 Datetime = 24/05/2020 01:11:33
@@ -40,4 +40,4 @@ Initial parameter guess = 1.6
 Optimised parameter (atomic units) = [1.6875]
 Optimised function value (atomic units) = -2.8476562498906066
 Number of iterations = 22
-Comments = test run 2 with cross term, psi = -self.alpha0*(self.r0 + self.r1)
+Comments = test run 2 with cross term, psi = -sy.exp(self.alpha0*(self.r0 + self.r1))
