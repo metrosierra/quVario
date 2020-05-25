@@ -42,7 +42,17 @@ class montyCarlo():
 
         self.macro1()
 
-
+    def integrator(self):
+        
+        pass
+    
+    def integrand(self):
+        
+        pass
+    
+    def trialfunction(self):
+        pass
+    
 
     def __enter__(self):
         pass
