@@ -38,27 +38,51 @@ class montyCarlo():
         self.pi = sc.pi
         self.perm = sc.epsilon_0
         self.k = (self.q**2)/(4*self.pi*self.perm)
+        self.n = 100000000
+        self.endpt = 1
+        self.stpt = -1
+        self.dims = 2
         sy.init_printing()
 
-        self.macro1()
-
-    def integrator(self):
-        
-        pass
-    
-    def integrand(self):
-        
-        pass
-    
+#        self.macro1()
+        print(self.integrator_basic())
+  
     def trialfunction(self):
         pass
     
-
+    def get_measure(self):
+        f = lambda x0, x1: 1.0
+        bounds = (self.stpt, self.endpt)
+        measure = integrate.nquad(f, [bounds, bounds])
+#        print(measure)
+        return measure[0]
+    
+    def integrator_basic(self):
+        ''' using mcint package to determine the integral, crudely
+        '''
+        # measure is the 'volume' over the region you are integrating over
+        result,error = mcint.integrate(self.integrand,self.sampler(), 
+                                        self.get_measure(), self.n)
+        return result
+    
+    def sampler(self):
+        while True:
+            x = random.uniform(self.stpt,self.endpt)
+            y = random.uniform(self.stpt,self.endpt)
+            yield (x,y)
+            
+    def integrand(self, x):
+        
+        return sp.exp(-(x[0]*x[1]) ** 2)  #x**2
+    
     def __enter__(self):
         pass
 
     def __exit__(self, e_type, e_val, traceback):
         pass
-
+    
+    
 ### start script
-e = eiGen()
+#e = eiGen()
+
+montyCarlo()
