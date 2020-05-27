@@ -40,42 +40,84 @@ class montyCarlo():
         self.pi = sc.pi
         self.perm = sc.epsilon_0
         self.k = (self.q**2)/(4*self.pi*self.perm)
-        self.n = 100000000
+        self.n = 100000
         self.endpt = 1
         self.stpt = -1
+        self.bounds = [(-1,1),(-1,1),(-1,1)]
         self.dims = 2
         sy.init_printing()
 
 #        self.macro1()
         print(self.integrator_basic())
+#        print(self.sampler(self.bounds))
 
-    def trialfunction(self):
-        pass
-
-    def get_measure(self):
-        f = lambda x0, x1: 1.0
-        bounds = (self.stpt, self.endpt)
-        measure = integrate.nquad(f, [bounds, bounds])
-#        print(measure)
-        return measure[0]
+    def get_measure(self, bounds):
+        ''' obtains n dimensional 'measure' for the integral, which effectively
+            is the volume in n dimensional space of the integral bounds. used for 
+            multiplying the expected value. 
+            
+            inputs: 
+                bounds: list of size n, indicating the n bounds of the definite
+                    integral 
+            
+            outputs: 
+                measure: float
+                
+        '''
+        measure = 1
+        
+        for i in bounds:
+            endpt = i[1]
+            stpt = i[0]
+            dimlength = endpt - stpt 
+            
+            measure *= dimlength
+                
+        return measure
 
     def integrator_basic(self):
         ''' using mcint package to determine the integral, crudely
+        
         '''
         # measure is the 'volume' over the region you are integrating over
-        result,error = mcint.integrate(self.integrand,self.sampler(),
-                                        self.get_measure(), self.n)
+        
+        result,error = mcint.integrate(self.integrand,self.sampler(self.bounds),
+                                        self.get_measure(self.bounds), self.n)
+        
         return result
-
-    def sampler(self):
+    
+    def sampler(self, bounds):
+        ''' generates a tuple of n input values from a random uniform distribution
+            e.g. for three dimensions, outputs tuple = (x,y,z) where x,y,z are
+            floats from a uniorm distribution
+        
+            inputs: 
+                bounds
+            
+            outputs: 
+                sample (tuple)
+        '''
         while True:
-            x = random.uniform(self.stpt,self.endpt)
-            y = random.uniform(self.stpt,self.endpt)
-            yield (x,y)
-
+            
+            sample = ()
+            
+            for i in bounds: 
+                endpt = i[1]
+                stpt = i[0]     
+                dimsample = random.uniform(stpt,endpt)
+                
+                x = list(sample)
+                x.append(dimsample)
+                sample = tuple(x)
+                
+            yield sample
+        
     def integrand(self, x):
+        ''' this is the integrand function
+        
+        '''
 
-        return sp.exp(-(x[0]*x[1]) ** 2)  #x**2
+        return sp.exp(-(x[0]*x[1]*x[2]) ** 2)  #x**2
 
     def __enter__(self):
         pass
