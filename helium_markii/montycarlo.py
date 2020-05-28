@@ -49,6 +49,7 @@ class montyCarlo():
 
 #        self.macro1()
         print(self.integrator_basic())
+        print(self.integrator_mc())
 #        print(self.sampler(self.bounds))
 
     def get_measure(self, bounds):
@@ -86,6 +87,16 @@ class montyCarlo():
         
         return result
     
+    #UNFINISHED
+#    def integrator_mc(self):
+#        ''' using mcint package to determine the integral, crudely
+#        
+#        '''
+#        # measure is the 'volume' over the region you are integrating over
+#        
+#        result,error = mcint.integrate(self.mcintegrand, self.metropolis_hastings(),
+#                                        self.get_measure(self.bounds), self.n)
+        
     def sampler(self, bounds):
         ''' generates a tuple of n input values from a random uniform distribution
             e.g. for three dimensions, outputs tuple = (x,y,z) where x,y,z are
@@ -111,6 +122,38 @@ class montyCarlo():
                 sample = tuple(x)
                 
             yield sample
+    
+
+    def metropolis_hastings(p, iter=1000, initial_pt = [0.,0.,0.,0.,0.,0.], dims = 6):
+        ''' Metropolis algorithm for sampling from a function p
+        
+            inputs: 
+                
+            outputs: 
+    
+        '''
+        if len(initial_pt) != dims:
+            raise Exception('Error with inputs')
+            
+        # note: initial point chosen in input
+        samples = np.zeros((iter, dims))
+        
+        # now sample iter number of points
+        for i in range(iter):
+            
+            # we propose a new point using a Symmetric transition distribution 
+            #function: a Gaussian
+            proposed_pt = np.array(initial_pt) + np.random.normal(size=dims)
+            
+            # if the ratio is greater than one, accepept the proposal
+            # else, accept with probability of the ratio
+            if np.random.rand() < p(proposed_pt) / p(initial_pt):
+                initial_pt = proposed_pt
+                
+            samples[i] = np.array(initial_pt)
+    
+        return samples
+
         
     def integrand(self, x):
         ''' this is the integrand function
@@ -118,6 +161,11 @@ class montyCarlo():
         '''
 
         return sp.exp(-(x[0]*x[1]*x[2]) ** 2)  #x**2
+    
+    def mcintegrand(self,x):
+        '''
+        '''
+        return sp.exp(-(x[0]*x[1]) ** 2)  #x**2
 
     def __enter__(self):
         pass
