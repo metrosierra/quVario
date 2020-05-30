@@ -44,17 +44,21 @@ class montyCarlo():
         self.pi = sc.pi
         self.perm = sc.epsilon_0
         self.k = (self.q**2)/(4*self.pi*self.perm)
-        self.n = 100000
-        self.endpt = 1
-        self.stpt = -1
-        self.bounds = [(-1,1),(-1,1),(-1,1)]
+        self.n = 1000
+
+        self.bounds = [(-1,1),(-1,1)]
         self.dims = 2
         sy.init_printing()
 
-#        self.macro1()
-        print(self.integrator_basic())
-#        print(self.sampler(self.bounds))
 
+#        print(self.integrator_basic())
+        
+#        print(self.sampler(self.bounds))
+        
+        print(self.integrator_mcmc(self.integrand_mcmc_p, self.integrand_mcmc_q, 
+                                   sample_iter = 100000, avg_iter = 10))
+
+### These helper functions concern the basic Monte Carlo Integrator
     def get_measure(self, bounds):
         ''' obtains n dimensional 'measure' for the integral, which effectively
             is the volume in n dimensional space of the integral bounds. used for
@@ -79,9 +83,10 @@ class montyCarlo():
 
         return measure
 
+
     def integrator_basic(self):
-        '''
-        using mcint package to determine the integral, crudely
+        ''' using mcint package to determine the integral via uniform distribution
+        sampling over an interval
 
         '''
         # measure is the 'volume' over the region you are integrating over
@@ -89,8 +94,9 @@ class montyCarlo():
         result,error = mcint.integrate(self.integrand,self.sampler(self.bounds),
                                         self.get_measure(self.bounds), self.n)
 
-        return result
-
+        return result, error
+    
+    
     def sampler(self, bounds):
         ''' generates a tuple of n input values from a random uniform distribution
             e.g. for three dimensions, outputs tuple = (x,y,z) where x,y,z are
@@ -116,13 +122,114 @@ class montyCarlo():
                 sample = tuple(x)
 
             yield sample
-
+            
     def integrand(self, x):
         ''' this is the integrand function
+        
+        inputs: x (array), where x[0] denotes the first variable
 
         '''
 
-        return sp.exp(-(x[0]*x[1]*x[2]) ** 2)  #x**2
+        return sp.exp(-(x[0]) ** 2)
+    
+    
+### These helper functions concern the Metropolis algorithm implementation of the integral
+    def integrator_mcmc(self, pfunc, qfunc, sample_iter = 100000, avg_iter = 10):
+        ''' fancy metropolis hastings integrator! where pfunc and qfunc give the
+        function f you want to integrate over. 
+        
+        inputs:
+            pfunc: effective probability density function
+            qfunc: some function where pfunc*qfunc = f 
+            
+        outputs: 
+            result: result of integral
+            error: error of integral
+        
+        '''
+        vals = np.zeros(10)
+        val_errors = np.zeros(10)
+            
+        for i in range (avg_iter):
+            
+            mc_samples = self.metropolis_hastings(self.integrand_mcmc_p, sample_iter, 
+                                                  initial_pt = np.array([0]), dims = 1)
+            
+            func_vals = self.integrand_mcmc_q(mc_samples)
+            
+            sums = np.sum(func_vals)
+            
+            vals[i] = (sums/sample_iter)
+        
+        vals_squared = np.sum(vals**2)
+        
+        vals_avg = np.sum(vals)/ avg_iter
+        
+        for i in range (avg_iter):
+            
+            val_errors[i] = (np.sqrt(vals_squared/ avg_iter - (vals_avg) ** 2))
+            
+        result = vals_avg
+        error = np.sum(val_errors)/ np.sqrt(avg_iter)
+        
+        return result, error
+    
+    def metropolis_hastings(self, p, iter=100000, initial_pt = [0.,0.,0.,0.,0.,0.], dims = 6):
+        ''' Metropolis algorithm for sampling from a function p
+        
+            inputs: 
+                
+            outputs: 
+    
+        '''
+        if len(initial_pt) != dims:
+            raise Exception('Error with inputs')
+
+        # note: initial point chosen in input
+        samples = np.zeros((iter, dims))
+
+        # now sample iter number of points
+        for i in range(iter):
+
+            # we propose a new point using a Symmetric transition distribution 
+            #function: a Gaussian
+            proposed_pt = np.array(initial_pt) + np.random.normal(size=dims)
+
+            # if the ratio is greater than one, accepept the proposal
+            # else, accept with probability of the ratio
+            if np.random.rand() < p(proposed_pt) / p(initial_pt):
+                initial_pt = proposed_pt
+
+            samples[i] = np.array(initial_pt)
+
+        return samples
+    
+    
+    def integrand_mcmc_q(self, x):
+        ''' this is the integrand function for mcmc
+        
+        inputs: x(array), denoting iter number of sample points, given by
+            metropolis hastings
+            
+        output:
+            array of function values 
+            
+        ''' 
+
+        return x**2 #sp.exp(-(x) ** 2)
+    
+    def integrand_mcmc_p(self, x):
+        ''' this is the integrand function for mcmc
+        
+        inputs: x(array), denoting iter number of sample points, given by
+            metropolis hastings
+            
+        output:
+            array of function values 
+        
+        ''' 
+
+        return 1 / np.sqrt(2 * np.pi) * sp.exp(-(x) ** 2 /2)
 
     def __enter__(self):
         pass
@@ -131,7 +238,4 @@ class montyCarlo():
         pass
 
 
-### start script
-#e = eiGen()
-
-m = montyCarlo()
+zsm = montyCarlo()
