@@ -36,13 +36,13 @@ MS's note: I will recycle my previous script for the two sets of electron coordi
 everything will be kept to atomic units
 '''
 
-class hamLet():
+class HamLet():
     def __init__(self):
         starttime = time.time()
         print('Hamiltonian Operator object initialised')
         self.coordsys = 'cartesian'
 
-        with psiLet() as psi:
+        with PsiLet() as psi:
             self.bases = psi.bases
             self.alphas = psi.alphas
             self.trial = parse_expr(psi.manualfunc())
@@ -51,22 +51,32 @@ class hamLet():
             self.r01 = parse_expr(psi.r01)
             self.r0 = parse_expr(psi.r0)
             self.r1 = parse_expr(psi.r1)
+        variables = self.bases#.append(self.alphas)
+        self.variables = [a for b in variables for a in b]
 
+        # self.he_expect = self.he_expectation()
+        # print('Helium energy expectation (non normalised, pre integrand) generated, available as "self".he_expect')
+        # self.he_normalisation = self.he_norm()
+        # print('Helium expectation integral normalisation term generated (pre integrand), available as "self".he_normalisation')
+        # # display(hi)
+        # endtime = time.time()
+        # elapsedtime = endtime - starttime
+        # print('time',elapsedtime)
+    def lambdah(self, expr):
+        return lambdify([self.variables], expr, 'numpy')
 
-        self.he_expect = self.he_expectation()
-        print('Helium energy expectation (non normalised, pre integrand) generated, available as "self".he_expect')
-        self.he_normalisation = self.he_norm()
-        print('Helium expectation integral normalisation term generated (pre integrand), available as "self".he_normalisation')
-        # display(hi)
-        endtime = time.time()
-        elapsedtime = endtime - starttime
-        print('time',elapsedtime)
+    def he_getfuncs(self):
+        return self.he_elocal(), self.he_norm(), self.he_trial()
 
-
-    def he_expectation(self):
+    def he_elocal(self):
         operated = self.he_operate(self.trial)
-        return self.trial*operated
+        return lambdify([self.variables], operated/self.trial, 'numpy')
 
+    def he_norm(self):
+        return lambdify([self.variables], self.trial*self.trial, 'numpy')
+
+    def he_trial(self):
+        return lambdify([self.variables], self.trial, 'numpy')
 
     def he_operate(self, expr):
         lap1 = -0.5*self.laplace(self.trial, 0)
@@ -75,8 +85,6 @@ class hamLet():
         repel = 1/self.r01
         return lap1 + lap2 + attract + repel
 
-    def he_norm(self):
-        return self.trial*self.trial
 
     def laplace(self, expr, index, coordsys = 'c'):
         if coordsys == 'cartesian' or coordsys == 'c':
@@ -100,11 +108,11 @@ class hamLet():
         pass
 
     def __exit__(self, e_type, e_val, traceback):
-        pass
+        print('HamLet object self-destructing...')
 
 
 
-class psiLet():
+class PsiLet():
     def __init__(self, electrons = 2, alphas = 1, coordsys = 'cartesian'):
         print('psiLet object initialised, reading input txt file (if any) for trial wavefunction')
         self.spawn_electrons(2, coord_sys = coordsys)
@@ -149,7 +157,7 @@ class psiLet():
         self.r1 = '(x1**2 + y1**2 + z1**2)**0.5'
         self.r01 = '((x0-x1)**2 + (y0-y1)**2 + (z0-z1)**2)**0.5'
 
-        expr = 'exp(-2*({}+{}))*'.format(self.r0, self.r1) + 'exp(({})/(2*(1+4*{}*alpha0)))'.format(self.r01, self.r01)
+        expr = 'exp(-2*({}+{}))*'.format(self.r0, self.r1) + 'exp(({})/(2*(1+4*{}*1.68)))'.format(self.r01, self.r01)
         return expr
 
 
@@ -157,6 +165,6 @@ class psiLet():
         return self
 
     def __exit__(self, e_type, e_val, traceback):
-        print('psiLet object destructing')
+        print('psiLet object self-destructing')
 
-ham = hamLet()
+# ham = hamLet()

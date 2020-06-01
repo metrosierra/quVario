@@ -5,11 +5,11 @@
 # github.com/starryblack/quVario
 
 
-### This script provides the montyCarlo object AND miniMiss object that handles any calls to monte carlo integration functions and minimisation functions of our design. It interfaces with the python packages installed for basic functionalities (ie mcint)
+### This script provides the montypython object AND minimiss object that handles any calls to monte carlo integration functions and minimisation functions of our design. It interfaces with the python packages installed for basic functionalities (ie mcint)
 ### optipack should serve helium_markii.py which is the higher level script for direct user interface
 
 
-### as of 27 may 2020 montycarlo uses mcint, and minimiss uses scipy fmin functions as main work horses.
+### as of 27 may 2020 montypython uses mcint, and minimiss uses scipy fmin functions as main work horses.
 
 
 import math
@@ -32,8 +32,9 @@ from scipy import optimize, integrate
 #### For future monte carlo integration work hopefully
 import mcint
 import random
+from numba import jit, njit
 
-class montyCarlo():
+class MontyPython():
 
     ### initialisation protocol for monteCarlo object
     def __init__(self):
@@ -46,16 +47,17 @@ class montyCarlo():
         self.n = 1000
 
         self.bounds = [(-1,1),(-1,1)]
-        self.dims = 2
+        self.dims = 6
         sy.init_printing()
+        print('\n\nMontyPython integrator initialised and ready! Dimensions = {}\n\n'.format(self.dims))
 
 
 #        print(self.integrator_basic())
 
 #        print(self.sampler(self.bounds))
 
-        print(self.integrator_mcmc(self.integrand_mcmc_p, self.integrand_mcmc_q,
-                                   sample_iter = 100000, avg_iter = 10))
+        # print(self.integrator_mcmc(self.integrand_mcmc_p, self.integrand_mcmc_q,
+        #                            sample_iter = 100000, avg_iter = 10))
 
 ### These helper functions concern the basic Monte Carlo Integrator
     def get_measure(self, bounds):
@@ -133,7 +135,8 @@ class montyCarlo():
 
 
 ### These helper functions concern the Metropolis algorithm implementation of the integral
-    def integrator_mcmc(self, pfunc, qfunc, sample_iter = 100000, avg_iter = 10):
+    # @jit
+    def integrator_mcmc(self, pfunc, qfunc, initial_point = [0,0,0,0,0,0], sample_iter = 100000, avg_iter = 10):
         ''' fancy metropolis hastings integrator! where pfunc and qfunc give the
         function f you want to integrate over.
 
@@ -150,10 +153,13 @@ class montyCarlo():
         val_errors = np.zeros(10)
 
         for i in range(avg_iter):
+            mc_samples = self.metropolis_hastings(pfunc, sample_iter, initial_pt = initial_point, dims = self.dims)
+            mc_samples = np.array(mc_samples)
 
-            mc_samples = self.metropolis_hastings(self.integrand_mcmc_p, sample_iter, initial_pt = np.array([0]), dims = 1)
-
-            func_vals = self.integrand_mcmc_q(mc_samples)
+            func_vals = []
+            for array in mc_samples:
+                func_vals.append(qfunc(array))
+            # print(func_vals)
 
             sums = np.sum(func_vals)
 
@@ -172,7 +178,8 @@ class montyCarlo():
 
         return result, error
 
-    def metropolis_hastings(self, p, iter=100000, initial_pt = [0.,0.,0.,0.,0.,0.], dims = 6):
+    # @jit
+    def metropolis_hastings(self, pfunc, iter=100000, initial_pt = [0.,0.,0.,0.,0.,0.], dims = 6):
         ''' Metropolis algorithm for sampling from a function p
 
             inputs:
@@ -195,7 +202,7 @@ class montyCarlo():
 
             # if the ratio is greater than one, accepept the proposal
             # else, accept with probability of the ratio
-            if np.random.rand() < p(proposed_pt) / p(initial_pt):
+            if np.random.rand() < pfunc(proposed_pt) / pfunc(initial_pt):
                 initial_pt = proposed_pt
 
             samples[i] = np.array(initial_pt)
@@ -230,10 +237,33 @@ class montyCarlo():
         return 1 / np.sqrt(2 * np.pi) * sp.exp(-(x) ** 2 /2)
 
     def __enter__(self):
-        pass
+        return self
 
     def __exit__(self, e_type, e_val, traceback):
-        pass
+        print('MontyPython object self-destructing')
 
 
-zsm = montyCarlo()
+
+
+class MiniMiss():
+
+    def __init__(self):
+        print('MiniMiss optimisation machine initialised and ready!')
+
+    def minimise(self, expr, guess, args):
+        starttime = time.time()
+
+        temp = optimize.fmin(func, guess, args = (args), full_output = 1)
+
+        endtime = time.time()
+        elapsedtime = endtime - starttime
+        now = datetime.now()
+        date_time = now.strftime('%d/%m/%Y %H:%M:%S')
+        # just returns datetime of attempt, elapsed time, optimised parameter, optimised value, number of iterations
+        return [date_time, elapsedtime, guess, temp[0], temp[1], temp[3]]
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, e_type, e_val, traceback):
+        print('\n\nMiniMiss object self-destructing\n\n')
