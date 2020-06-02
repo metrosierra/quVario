@@ -56,8 +56,8 @@ class MontyPython():
 
 #        print(self.sampler(self.bounds))
 
-        # print(self.integrator_mcmc(self.integrand_mcmc_p, self.integrand_mcmc_q,
-        #                            sample_iter = 100000, avg_iter = 10))
+        print(self.integrator_mcmc(self.integrand_mcmc_p, self.integrand_mcmc_q, np.array([0]),
+                                    sample_iter = 10000, avg_iter = 10))
 
 ### These helper functions concern the basic Monte Carlo Integrator
     def get_measure(self, bounds):
@@ -136,7 +136,7 @@ class MontyPython():
 
 ### These helper functions concern the Metropolis algorithm implementation of the integral
     # @jit
-    def integrator_mcmc(self, pfunc, qfunc, initial_point = [0,0,0,0,0,0], sample_iter = 100000, avg_iter = 10):
+    def integrator_mcmc(self, pfunc, qfunc, initial_point, sample_iter = 100000, avg_iter = 10):
         ''' fancy metropolis hastings integrator! where pfunc and qfunc give the
         function f you want to integrate over.
 
@@ -149,22 +149,23 @@ class MontyPython():
             error: error of integral
 
         '''
-        vals = np.zeros(10)
-        val_errors = np.zeros(10)
+        vals = np.zeros(avg_iter)
+        val_errors = np.zeros(avg_iter)
 
         for i in range(avg_iter):
-            mc_samples = self.metropolis_hastings(pfunc, sample_iter, initial_pt = initial_point, dims = self.dims)
+            mc_samples = self.metropolis_hastings(pfunc, sample_iter, initial_pt = initial_point)
             mc_samples = np.array(mc_samples)
 
             func_vals = []
+            
+            # obtain arithmetic average of sampled Q values
             for array in mc_samples:
                 func_vals.append(qfunc(array))
-            # print(func_vals)
 
             sums = np.sum(func_vals)
 
             vals[i] = (sums/sample_iter)
-
+        # also calculate the variance
         vals_squared = np.sum(vals**2)
 
         vals_avg = np.sum(vals)/ avg_iter
@@ -179,14 +180,22 @@ class MontyPython():
         return result, error
 
     # @jit
-    def metropolis_hastings(self, pfunc, iter=100000, initial_pt = [0.,0.,0.,0.,0.,0.], dims = 6):
+    def metropolis_hastings(self, pfunc, iter, initial_pt):
         ''' Metropolis algorithm for sampling from a function p
 
             inputs:
+                pfunc: effective probability density function part of 
+                    function f we want to integrate over
+                iter: number of random walk iterations
+                initial_pt: starting point
+                dims: dimensions of the sample
 
             outputs:
 
         '''
+        dims = np.size(initial_pt)
+        
+        # simple sanity check
         if len(initial_pt) != dims:
             raise Exception('Error with inputs')
 
@@ -211,7 +220,7 @@ class MontyPython():
 
 
     def integrand_mcmc_q(self, x):
-        ''' this is the integrand function for mcmc
+        ''' this is the Q part of the integrand function for mcmc
 
         inputs: x(array), denoting iter number of sample points, given by
             metropolis hastings
@@ -219,9 +228,10 @@ class MontyPython():
         output:
             array of function values
 
+        CURRENTLY TESTING ON FUNCTION X**2 * GAUSSIAN 
         '''
 
-        return x**2 #sp.exp(-(x) ** 2)
+        return x**2 
 
     def integrand_mcmc_p(self, x):
         ''' this is the integrand function for mcmc
@@ -231,7 +241,8 @@ class MontyPython():
 
         output:
             array of function values
-
+        
+        CURRENTLY TESTING ON FUNCTION X**2 * GAUSSIAN 
         '''
 
         return 1 / np.sqrt(2 * np.pi) * sp.exp(-(x) ** 2 /2)
@@ -244,6 +255,7 @@ class MontyPython():
 
 
 
+m = MontyPython()
 
 class MiniMiss():
 
