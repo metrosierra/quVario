@@ -29,10 +29,13 @@ from sympy import *
 from IPython.display import display
 from scipy import optimize, integrate
 
+import matplotlib.pyplot as plt
+
 #### For future monte carlo integration work hopefully
 import mcint
 import random
 from numba import jit, njit
+
 
 class MontyPython():
 
@@ -44,20 +47,25 @@ class MontyPython():
         self.pi = sc.pi
         self.perm = sc.epsilon_0
         self.k = (self.q**2)/(4*self.pi*self.perm)
+
+        
+        # Variable used to control for one set of plots
+        self.plotgraph = True
+        
+        # These are for the uniform sampling integrator
         self.n = 1000
-
         self.bounds = [(-1,1),(-1,1)]
-        self.dims = 6
-        sy.init_printing()
-        print('\n\nMontyPython integrator initialised and ready! Dimensions = {}\n\n'.format(self.dims))
-
-
+        self.dims = 2
+        
 #        print(self.integrator_basic())
-
 #        print(self.sampler(self.bounds))
+        
+        # This the implementation for the Metropolis Algorithm of integration
+        print('\n\nMontyPython integrator initialised and ready! Dimensions = {}\n\n'.format(self.dims))
+        print(self.integrator_mcmc(self.integrand_mcmc_p, self.integrand_mcmc_q, np.zeros(1), 10000, 10, alpha= 1.))
+        
+        
 
-        print(self.integrator_mcmc(self.integrand_mcmc_p, self.integrand_mcmc_q, np.array([0]),
-                                    sample_iter = 10000, avg_iter = 10))
 
 ### These helper functions concern the basic Monte Carlo Integrator
     def get_measure(self, bounds):
@@ -71,7 +79,6 @@ class MontyPython():
 
             outputs:
                 measure: float
-
         '''
         measure = 1
 
@@ -135,14 +142,15 @@ class MontyPython():
 
 
 ### These helper functions concern the Metropolis algorithm implementation of the integral
-    # @jit
-    def integrator_mcmc(self, pfunc, qfunc, initial_point, sample_iter = 100000, avg_iter = 10):
+#    @njit
+    def integrator_mcmc(self, pfunc, qfunc, initial_point, sample_iter, avg_iter, alpha):
         ''' fancy metropolis hastings integrator! where pfunc and qfunc give the
         function f you want to integrate over.
 
         inputs:
             pfunc: effective probability density function
             qfunc: some function where pfunc*qfunc = f
+            alpha: variational parameter
 
         outputs:
             result: result of integral
@@ -153,14 +161,14 @@ class MontyPython():
         val_errors = np.zeros(avg_iter)
 
         for i in range(avg_iter):
-            mc_samples = self.metropolis_hastings(pfunc, sample_iter, initial_pt = initial_point)
+            mc_samples = self.metropolis_hastings(pfunc, sample_iter, initial_point, alpha)
             mc_samples = np.array(mc_samples)
 
             func_vals = []
             
             # obtain arithmetic average of sampled Q values
             for array in mc_samples:
-                func_vals.append(qfunc(array))
+                func_vals.append(qfunc(array, alpha))
 
             sums = np.sum(func_vals)
 
@@ -179,9 +187,9 @@ class MontyPython():
 
         return result, error
 
-    # @jit
-    def metropolis_hastings(self, pfunc, iter, initial_pt):
-        ''' Metropolis algorithm for sampling from a function p
+#    @njit
+    def metropolis_hastings(self, pfunc, iter, initial_pt, alpha):
+        ''' Metropolis algorithm for sampling from a function q based on p
 
             inputs:
                 pfunc: effective probability density function part of 
@@ -189,10 +197,12 @@ class MontyPython():
                 iter: number of random walk iterations
                 initial_pt: starting point
                 dims: dimensions of the sample
+                alpha: variational parameter
 
             outputs:
-
+                samples: array of points to input into qfunc
         '''
+        
         dims = np.size(initial_pt)
         
         # simple sanity check
@@ -200,26 +210,45 @@ class MontyPython():
             raise Exception('Error with inputs')
 
         # note: initial point chosen in input
+        # keeping track of samples and initial_points
         samples = np.zeros((iter, dims))
-
+        
         # now sample iter number of points
         for i in range(iter):
-
             # we propose a new point using a Symmetric transition distribution
-            #function: a Gaussian
+            # function: a Gaussian
             proposed_pt = np.array(initial_pt) + np.random.normal(size=dims)
 
             # if the ratio is greater than one, accepept the proposal
             # else, accept with probability of the ratio
-            if np.random.rand() < pfunc(proposed_pt) / pfunc(initial_pt):
-                initial_pt = proposed_pt
-
+            if proposed_pt != 0:   
+                if np.random.rand() < pfunc(proposed_pt, alpha) / pfunc(initial_pt, alpha):
+                    initial_pt = proposed_pt
+            
+            # add new point to array 
             samples[i] = np.array(initial_pt)
-
+        
+        ### Some indicator for the running average of the points, looking at whether we should
+        ### discard some of the initial samples or not
+        if self.plotgraph: 
+            for i in range(dims):
+                plt.plot(samples)
+                plt.plot(running_mean(samples, 50))
+                plt.show()
+                    
+            ### Some graphs of the sample locations! Should look a lot like pfunc!
+                plt.hist(samples, bins=np.arange(0,5,0.2))
+                plt.title('Sample histogram for random walk')
+                plt.ylabel('Number')
+                plt.xlabel('Sample locations')
+                plt.show()
+            
+            self.plotgraph = False
+            
         return samples
 
 
-    def integrand_mcmc_q(self, x):
+    def integrand_mcmc_q(self, x, alpha):
         ''' this is the Q part of the integrand function for mcmc
 
         inputs: x(array), denoting iter number of sample points, given by
@@ -228,12 +257,12 @@ class MontyPython():
         output:
             array of function values
 
-        CURRENTLY TESTING ON FUNCTION X**2 * GAUSSIAN 
         '''
 
-        return x**2 
+        return -1 / x - 0.5 * alpha * (alpha - 2 / x)
+#        return x**2
 
-    def integrand_mcmc_p(self, x):
+    def integrand_mcmc_p(self, x, alpha):
         ''' this is the integrand function for mcmc
 
         inputs: x(array), denoting iter number of sample points, given by
@@ -242,10 +271,14 @@ class MontyPython():
         output:
             array of function values
         
-        CURRENTLY TESTING ON FUNCTION X**2 * GAUSSIAN 
         '''
-
-        return 1 / np.sqrt(2 * np.pi) * sp.exp(-(x) ** 2 /2)
+        multiplier = 1
+        
+        if x < 0:
+            multiplier = 0
+        
+        return np.exp(-alpha*x) * multiplier
+#        return 1 / np.sqrt(2 * np.pi) * sp.exp(-(x+4) ** 2 /2)
 
     def __enter__(self):
         return self
@@ -253,6 +286,13 @@ class MontyPython():
     def __exit__(self, e_type, e_val, traceback):
         print('MontyPython object self-destructing')
 
+
+def running_mean(x, N):
+    ''' This is a helper function for computing the running mean
+    '''
+    cumsum = np.cumsum(np.insert(x, 0, 0)) 
+    
+    return (cumsum[N:] - cumsum[:-N]) / float(N)
 
 
 m = MontyPython()
