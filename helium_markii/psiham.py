@@ -28,7 +28,8 @@ from sympy import *
 from IPython.display import display
 from scipy import optimize, integrate
 from sympy.parsing.sympy_parser import parse_expr
-
+from numba import jit, njit
+from sympy.utilities.lambdify import lambdastr
 
 '''
 MS's note: I will recycle my previous script for the two sets of electron coordinates and use sympy to symbolically generate the laplacian for each electron. I think we can safe assume our trial functions are analytical indefinitely so finding the laplacian is easy?
@@ -46,37 +47,51 @@ class HamLet():
             self.bases = psi.bases
             self.alphas = psi.alphas
             self.trial = parse_expr(psi.manualfunc())
-
+            self.e_local = parse_expr(psi.manual2())
             #for convenience
             self.r01 = parse_expr(psi.r01)
             self.r0 = parse_expr(psi.r0)
             self.r1 = parse_expr(psi.r1)
-        variables = self.bases#.append(self.alphas)
-        self.variables = [a for b in variables for a in b]
+        self.bases.append(self.alphas)
+        self.variables = [a for b in self.bases for a in b]
 
-        # self.he_expect = self.he_expectation()
-        # print('Helium energy expectation (non normalised, pre integrand) generated, available as "self".he_expect')
-        # self.he_normalisation = self.he_norm()
-        # print('Helium expectation integral normalisation term generated (pre integrand), available as "self".he_normalisation')
-        # # display(hi)
-        # endtime = time.time()
-        # elapsedtime = endtime - starttime
-        # print('time',elapsedtime)
-    def lambdah(self, expr):
-        return lambdify([self.variables], expr, 'numpy')
+
+    def numbafy(self, expression, parameters=None, constants=None, new_function_name='trial_func'):
+            code_parameters = ''
+            code_constants = ''
+            if parameters:
+                code_parameters = ', '.join(f'{p}' for p in parameters)
+            if constants:
+                code_constants = []
+                for k, v in constants.items():
+                    code_constants.append(f'{k} = {v}')
+                code_constants = '\n    '.join(code_constants)
+
+            temp = lambdastr((), expression)
+            temp = temp[len('lambda : '):]
+            code_expression = f'{temp}'
+
+            template = f"""
+@njit(parallel = True)
+def {new_function_name}({code_parameters}):
+    {code_constants}
+    return {code_expression}"""
+            print('function made!!!')
+            return template
+
 
     def he_getfuncs(self):
         return self.he_elocal(), self.he_norm(), self.he_trial()
 
     def he_elocal(self):
         operated = self.he_operate(self.trial)
-        return lambdify([self.variables], operated/self.trial, 'numpy')
+        return (self.variables, operated/self.trial)
 
     def he_norm(self):
-        return lambdify([self.variables], self.trial*self.trial, 'numpy')
+        return (self.variables, self.trial*self.trial)
 
     def he_trial(self):
-        return lambdify([self.variables], self.trial, 'numpy')
+        return (self.variables, self.trial)
 
     def he_operate(self, expr):
         lap1 = -0.5*self.laplace(self.trial, 0)
@@ -102,6 +117,7 @@ class HamLet():
             grad = [sy.diff(expr, r), 1/r * sy.diff(expr, t), 1/(r*sin(t)) * sy.diff(expr, p)]
             lap = (1/r**2)*sy.diff(r**2 * grad[0], r) + (1/(r*sin(t)))*(sy.diff(grad[1] * sin(t), t) + sy.diff(grad[2], p))
 
+        print(lap)
         return lap
 
     def __enter__(self):
@@ -157,9 +173,18 @@ class PsiLet():
         self.r1 = '(x1**2 + y1**2 + z1**2)**0.5'
         self.r01 = '((x0-x1)**2 + (y0-y1)**2 + (z0-z1)**2)**0.5'
 
-        expr = 'exp(-2*({}+{}))*'.format(self.r0, self.r1) + 'exp(({})/(2*(1+4*{}*1.68)))'.format(self.r01, self.r01)
+        expr = f'''exp(-2*{self.r0}-2*{self.r1}+{self.r01}/(2*(1+alpha0*{self.r01})))'''
         return expr
 
+    def manual2(self):
+        self.r0 = '(x0**2 + y0**2 + z0**2)**0.5'
+        self.r1 = '(x1**2 + y1**2 + z1**2)**0.5'
+        self.r01 = '((x0-x1)**2 + (y0-y1)**2 + (z0-z1)**2)**0.5'
+        self.dot01 = 'x0*x1 + y0*y1 + z0*z1'
+
+        expr = f"""-4 + ({self.r0} + {self.r1})*(1 - {self.dot01}/({self.r0}*{self.r01}))/({self.r01}*(1+alpha0*{self.r01})**2) - 1/({self.r01}*(1+alpha0*{self.r01})**3) - 1/(4*{self.r01}*(1+alpha0*{self.r01})**4) + 1/{self.r01}"""
+
+        return expr
 
     def __enter__(self):
         return self
@@ -167,4 +192,12 @@ class PsiLet():
     def __exit__(self, e_type, e_val, traceback):
         print('psiLet object self-destructing')
 
-# ham = hamLet()
+ham = HamLet()
+
+variables, expr = ham.he_elocal()
+
+q = ham.numbafy(expr, parameters = variables)
+exec(q)
+
+hi = trial_func(1,1,1,1,1,2,2.3)
+print(hi)

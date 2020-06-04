@@ -48,23 +48,45 @@ class MontyPython():
         self.perm = sc.epsilon_0
         self.k = (self.q**2)/(4*self.pi*self.perm)
 
-        
+
         # Variable used to control for one set of plots
         self.plotgraph = True
-        
+
         # These are for the uniform sampling integrator
         self.n = 1000
         self.bounds = [(-1,1),(-1,1)]
         self.dims = 2
-        
+
 #        print(self.integrator_basic())
 #        print(self.sampler(self.bounds))
-        
+
         # This the implementation for the Metropolis Algorithm of integration
         print('\n\nMontyPython integrator initialised and ready! Dimensions = {}\n\n'.format(self.dims))
         print(self.integrator_mcmc(self.integrand_mcmc_p, self.integrand_mcmc_q, np.zeros(1), 10000, 10, alpha= 1.))
-        
-        
+
+
+    def 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 ### These helper functions concern the basic Monte Carlo Integrator
@@ -165,7 +187,7 @@ class MontyPython():
             mc_samples = np.array(mc_samples)
 
             func_vals = []
-            
+
             # obtain arithmetic average of sampled Q values
             for array in mc_samples:
                 func_vals.append(qfunc(array, alpha))
@@ -192,7 +214,7 @@ class MontyPython():
         ''' Metropolis algorithm for sampling from a function q based on p
 
             inputs:
-                pfunc: effective probability density function part of 
+                pfunc: effective probability density function part of
                     function f we want to integrate over
                 iter: number of random walk iterations
                 initial_pt: starting point
@@ -202,9 +224,9 @@ class MontyPython():
             outputs:
                 samples: array of points to input into qfunc
         '''
-        
+
         dims = np.size(initial_pt)
-        
+
         # simple sanity check
         if len(initial_pt) != dims:
             raise Exception('Error with inputs')
@@ -212,7 +234,7 @@ class MontyPython():
         # note: initial point chosen in input
         # keeping track of samples and initial_points
         samples = np.zeros((iter, dims))
-        
+
         # now sample iter number of points
         for i in range(iter):
             # we propose a new point using a Symmetric transition distribution
@@ -221,30 +243,30 @@ class MontyPython():
 
             # if the ratio is greater than one, accepept the proposal
             # else, accept with probability of the ratio
-            if proposed_pt != 0:   
+            if proposed_pt != 0:
                 if np.random.rand() < pfunc(proposed_pt, alpha) / pfunc(initial_pt, alpha):
                     initial_pt = proposed_pt
-            
-            # add new point to array 
+
+            # add new point to array
             samples[i] = np.array(initial_pt)
-        
+
         ### Some indicator for the running average of the points, looking at whether we should
         ### discard some of the initial samples or not
-        if self.plotgraph: 
+        if self.plotgraph:
             for i in range(dims):
                 plt.plot(samples)
                 plt.plot(running_mean(samples, 50))
                 plt.show()
-                    
+
             ### Some graphs of the sample locations! Should look a lot like pfunc!
                 plt.hist(samples, bins=np.arange(0,5,0.2))
                 plt.title('Sample histogram for random walk')
                 plt.ylabel('Number')
                 plt.xlabel('Sample locations')
                 plt.show()
-            
+
             self.plotgraph = False
-            
+
         return samples
 
 
@@ -270,13 +292,13 @@ class MontyPython():
 
         output:
             array of function values
-        
+
         '''
         multiplier = 1
-        
+
         if x < 0:
             multiplier = 0
-        
+
         return np.exp(-alpha*x) * multiplier
 #        return 1 / np.sqrt(2 * np.pi) * sp.exp(-(x+4) ** 2 /2)
 
@@ -287,11 +309,25 @@ class MontyPython():
         print('MontyPython object self-destructing')
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 def running_mean(x, N):
     ''' This is a helper function for computing the running mean
     '''
-    cumsum = np.cumsum(np.insert(x, 0, 0)) 
-    
+    cumsum = np.cumsum(np.insert(x, 0, 0))
+
     return (cumsum[N:] - cumsum[:-N]) / float(N)
 
 
