@@ -285,20 +285,6 @@ class MontyPython():
         print('MontyPython object self-destructing')
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 def running_mean(x, N):
     ''' This is a helper function for computing the running mean
     '''
