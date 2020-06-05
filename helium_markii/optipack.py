@@ -55,38 +55,15 @@ class MontyPython():
         # These are for the uniform sampling integrator
         self.n = 1000
         self.bounds = [(-1,1),(-1,1)]
-        self.dims = 2
+        self.dims = 6
 
 #        print(self.integrator_basic())
 #        print(self.sampler(self.bounds))
 
         # This the implementation for the Metropolis Algorithm of integration
         print('\n\nMontyPython integrator initialised and ready! Dimensions = {}\n\n'.format(self.dims))
-        print(self.integrator_mcmc(self.integrand_mcmc_p, self.integrand_mcmc_q, np.zeros(1), 10000, 10, alpha= 1.))
-
-
-    def 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        print('This may take a while!')
+        print(self.integrator_mcmc(self.integrand_mcmc_p, self.integrand_mcmc_q, np.random.normal(size = self.dims), 100000, 10, alpha= 1.5))
 
 
 ### These helper functions concern the basic Monte Carlo Integrator
@@ -115,7 +92,7 @@ class MontyPython():
 
 
     def integrator_basic(self):
-        ''' using mcint package to determine the integral via uniform distribution
+        ''' UNIFORM SAMPLER: using mcint package to determine the integral via uniform distribution
         sampling over an interval
 
         '''
@@ -128,8 +105,8 @@ class MontyPython():
 
 
     def sampler(self, bounds):
-        ''' generates a tuple of n input values from a random uniform distribution
-            e.g. for three dimensions, outputs tuple = (x,y,z) where x,y,z are
+        ''' UNIFORM SAMPLER: generates a tuple of n input values from a random uniform 
+            distribution e.g. for three dimensions, outputs tuple = (x,y,z) where x,y,z are
             floats from a uniorm distribution
 
             inputs:
@@ -154,7 +131,7 @@ class MontyPython():
             yield sample
 
     def integrand(self, x):
-        ''' this is the integrand function
+        ''' UNIFORM SAMPLER: this is the integrand function
 
         inputs: x (array), where x[0] denotes the first variable
 
@@ -166,7 +143,7 @@ class MontyPython():
 ### These helper functions concern the Metropolis algorithm implementation of the integral
 #    @njit
     def integrator_mcmc(self, pfunc, qfunc, initial_point, sample_iter, avg_iter, alpha):
-        ''' fancy metropolis hastings integrator! where pfunc and qfunc give the
+        ''' fancy METROPOLIS HASTINGS integrator! where pfunc and qfunc give the
         function f you want to integrate over.
 
         inputs:
@@ -211,7 +188,8 @@ class MontyPython():
 
 #    @njit
     def metropolis_hastings(self, pfunc, iter, initial_pt, alpha):
-        ''' Metropolis algorithm for sampling from a function q based on p
+        ''' METROPOLIS HASTINGS: Metropolis algorithm for sampling from a 
+                function q based on p
 
             inputs:
                 pfunc: effective probability density function part of
@@ -243,24 +221,34 @@ class MontyPython():
 
             # if the ratio is greater than one, accepept the proposal
             # else, accept with probability of the ratio
-            if proposed_pt != 0:
-                if np.random.rand() < pfunc(proposed_pt, alpha) / pfunc(initial_pt, alpha):
-                    initial_pt = proposed_pt
+            while proposed_pt.any() == 0.:
+                proposed_pt[proposed_pt == 0.] += np.random.normal(size=dims)
+                
+            if np.random.rand() < pfunc(proposed_pt, alpha) / pfunc(initial_pt, alpha):
+                initial_pt = proposed_pt
 
             # add new point to array
             samples[i] = np.array(initial_pt)
-
-        ### Some indicator for the running average of the points, looking at whether we should
-        ### discard some of the initial samples or not
+        
+        ### Visualises 1) The location sampled over iterations and 2) distribution of samples
+        ### Some indicator for the running average of the points, discard initial samples
+        ### if the running mean has large deviations
         if self.plotgraph:
+            ### plots one graph for each dimension
             for i in range(dims):
-                plt.plot(samples)
-                plt.plot(running_mean(samples, 50))
+                plt.plot(samples[:, i])
+                mean_bin = 50
+                plt.plot(running_mean(samples[:, i], mean_bin))
+                
+                plt.title('Sample histogram for random walk, dimension %i' %i+1)
+                plt.ylabel('Number')
+                plt.xlabel('Sample locations')
+                
                 plt.show()
 
             ### Some graphs of the sample locations! Should look a lot like pfunc!
-                plt.hist(samples, bins=np.arange(0,5,0.2))
-                plt.title('Sample histogram for random walk')
+                plt.hist(samples[:, i], bins=np.arange(-5,5,0.2))
+                plt.title('Sample histogram for random walk, dimension %i' %i+1)
                 plt.ylabel('Number')
                 plt.xlabel('Sample locations')
                 plt.show()
@@ -270,37 +258,73 @@ class MontyPython():
         return samples
 
 
+### The following are TEST CASES regarding functions to integrate over
     def integrand_mcmc_q(self, x, alpha):
-        ''' this is the Q part of the integrand function for mcmc
-
-        inputs: x(array), denoting iter number of sample points, given by
+        ''' METROPOLIS HASTINGS TESTING: this is the Q part of the integrand function 
+                for mcmc
+        inputs: 
+            x (array), denoting iter number of sample points, given by
             metropolis hastings
-
+            alpha (array): variational parameter
         output:
             array of function values
-
         '''
-
-        return -1 / x - 0.5 * alpha * (alpha - 2 / x)
+        ### hydrogen local energy
+#        return -1 / np.abs(x) - 0.5 * alpha * (alpha - 2 / np.abs(x))
+        
+        ### x**2 multiplier for shifted Gaussian test case
 #        return x**2
+        
+        ### helium local energy
+        r1 = np.array(x[0:3])
+        r2 = np.array(x[3:])
+#        r1_len = np.sqrt(x[0]**2 + x[1]**2 + x[2]**2)
+#        r2_len = np.sqrt(x[3]**2 + x[4]**2 + x[5]**2)
+        
+        r1_len = np.linalg.norm(r1)
+        r2_len = np.linalg.norm(r2)
+        
+        r1_hat = r1 / r1_len
+        r2_hat = r2 / r2_len
+        
+        r12 = np.sqrt((x[0]-x[3])**2 + (x[1]-x[4])**2 + (x[2]-x[5])**2)
+        
+        return (-4 + np.dot(r1_hat - r2_hat, r1 - r2 ) / (r12 * (1+alpha*r12)**2)
+                - 1/ (r12*(1+alpha*r12)**3) 
+                - 1/ (4*(1+alpha*r12)**4) 
+                + 1/ r12 )
+        
+
 
     def integrand_mcmc_p(self, x, alpha):
-        ''' this is the integrand function for mcmc
-
-        inputs: x(array), denoting iter number of sample points, given by
+        ''' METROPOLIS HASTINGS TESTING: this is the integrand function for mcmc
+        
+        inputs: 
+            x(array), denoting iter number of sample points, given by
             metropolis hastings
-
+            alpha (array): variational parameter
         output:
             array of function values
 
+        
         '''
-        multiplier = 1
-
-        if x < 0:
-            multiplier = 0
-
-        return np.exp(-alpha*x) * multiplier
+        ### hydrogen wavefunction squared
+#        return (np.exp(-alpha*np.abs(x)))**2
+        
+        ### shifted Gaussian test case
 #        return 1 / np.sqrt(2 * np.pi) * sp.exp(-(x+4) ** 2 /2)
+        
+        ### helium wavefunction squared
+        r1 = np.array(x[0:3])
+        r2 = np.array(x[3:])
+        r1_len = np.linalg.norm(r1)
+        r2_len = np.linalg.norm(r2)
+        r12 = np.sqrt((x[0]-x[3])**2 + (x[1]-x[4])**2 + (x[2]-x[5])**2)
+        
+        return (np.exp(-2 * r1_len)* np.exp(-2 * r2_len)  
+                * np.exp(r12 / (2 * (1+ alpha*r12)))) ** 2
+    
+
 
     def __enter__(self):
         return self
@@ -310,25 +334,6 @@ class MontyPython():
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-def running_mean(x, N):
-    ''' This is a helper function for computing the running mean
-    '''
-    cumsum = np.cumsum(np.insert(x, 0, 0))
-
-    return (cumsum[N:] - cumsum[:-N]) / float(N)
 
 
 m = MontyPython()
@@ -355,3 +360,12 @@ class MiniMiss():
 
     def __exit__(self, e_type, e_val, traceback):
         print('\n\nMiniMiss object self-destructing\n\n')
+        
+
+def running_mean(x, N):
+    ''' This is a helper function for computing the running mean
+    '''
+    cumsum = np.cumsum(np.insert(x, 0, 0))
+
+    return (cumsum[N:] - cumsum[:-N]) / float(N)
+
