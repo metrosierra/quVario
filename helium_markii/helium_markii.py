@@ -24,8 +24,9 @@ class Noble():
         self.gen_q()
         self.gen_p()
         self.gen_pp()
-        self.finalfinal()
-
+        self.monty.plotgraph = True
+        data = self.finalfinal()
+        self.custom_log(data)
 
 #    def get_functions(self):
 
@@ -48,12 +49,20 @@ class Noble():
 
 
     def final_comp(self, args):
-        hi = self.monty.integrator_mcmc(pfunc, pp, np.array([1,1,1,1,1,2]), 10000, 10, alpha = float(args))
+        hi = self.monty.integrator_mcmc(pfunc, qfunc, np.array([1,1,1,1,1,2]), 10000, 10, alpha = float(args))
         return hi[0]
 
     def finalfinal(self):
-        self.mini.minimise(func = self.final_comp, guess = 2.0)
+        temp = self.mini.minimise(func = self.final_comp, guess = 2.0, ftol = 0.05)
+        return temp
 
+    def custom_log(self, data = [], comments = None):
+        log = open('markii_log.txt', 'a+')
+        separator = '\n{}\n'.format(''.join('#' for i in range(10)))
+        info = separator + 'Datetime = {}\n'.format(data[0]) + 'Time taken (s) = {}\n'.format(data[1]) + 'Initial parameter guess (atomic untis) = {}\n'.format(data[2]) + 'Optimised parameter (atomic units) = {}\n'.format(data[3]) + 'Optimised function value (atomic units) = {}\n'.format(data[4]) + 'Number of iterations = {}\n'.format(data[5]) + 'Comments = ({})\n'.format(comments)
+        print(info)
+        log.write(info)
+        log.close()
 
 
     def __enter__(self):

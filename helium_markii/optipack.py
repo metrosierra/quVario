@@ -180,9 +180,9 @@ class MontyPython():
             val_errors[i] = (np.sqrt(vals_squared/ avg_iter - (vals_avg) ** 2))
 
         result = vals_avg
-        error = np.sum(val_errors)/ np.sqrt(avg_iter)
-        print('Iteration cycle complete, result = ', result, 'error = ', error)
-        return result, error
+        std = np.sqrt(np.sum(val_errors)/ np.sqrt(avg_iter))
+        print('Iteration cycle complete, result = ', result, 'error = ', std)
+        return result, std
 
     # @njit
     def metropolis_hastings(self, pfunc, iter, initial_pt, alpha):
@@ -218,67 +218,88 @@ class MontyPython():
 
             # if the ratio is greater than one, accepept the proposal
             # else, accept with probability of the ratio
-            if np.sum(proposed_pt) != 0:
-                if np.random.rand() < pfunc(proposed_pt, alpha) / pfunc(initial_pt, alpha):
-                    initial_pt = proposed_pt
+
+
+            if np.random.rand() < pfunc(proposed_pt, alpha) / pfunc(initial_pt, alpha):
+                initial_pt = proposed_pt
 
             # add new point to array
             samples[i] = np.array(initial_pt)
 
         ### Some indicator for the running average of the points, looking at whether we should
         ### discard some of the initial samples or not
-        # if self.plotgraph:
-        #     for i in range(dims):
-        #         plt.plot(samples)
-        #         plt.plot(running_mean(samples, 50))
-        #         plt.show(block = False)
-        #         plt.pause(0.7)
-        #         plt.close()
-        #
-        #     ### Some graphs of the sample locations! Should look a lot like pfunc!
-        #         plt.hist(samples, bins=np.arange(0,5,0.2))
-        #         plt.title('Sample histogram for random walk')
-        #         plt.ylabel('Number')
-        #         plt.xlabel('Sample locations')
-        #         plt.show(block = False)
-        #         plt.pause(0.7)
-        #         plt.close()
-        #     self.plotgraph = False
+        if self.plotgraph:
+            for i in range(dims):
+                plt.plot(samples[:, i])
+                mean_bin = 50
+                plt.plot(self.running_mean(samples[:, i], mean_bin))
+                plt.title('Sample histogram for random walk, dimension {}'.format(str(i+1)) )
+                plt.ylabel('Number')
+                plt.xlabel('Sample locations')
+                plt.show(block = False)
+                plt.pause(0.7)
+                plt.close()
+
+            ### Some graphs of the sample locations! Should look a lot like pfunc!
+                plt.hist(samples[:, i], bins=np.arange(-5,5,0.2))
+                plt.title('Sample histogram for random walk, dimension {}'.format(str(i+1)))
+                plt.ylabel('Number')
+                plt.xlabel('Sample locations')
+                plt.show(block = False)
+                plt.pause(0.7)
+                plt.close()
+            self.plotgraph = False
 
         return samples
 
 
-    def integrand_mcmc_q(self, x, alpha):
+    def mcmc_q(self, x, alpha):
         ''' this is the Q part of the integrand function for mcmc
-
         inputs: x(array), denoting iter number of sample points, given by
-            metropolis hastings
-
-        output:
-            array of function values
-
         '''
 
-        return -1 / x - 0.5 * alpha * (alpha - 2 / x)
-#        return x**2
 
-    def integrand_mcmc_p(self, x, alpha):
-        ''' this is the integrand function for mcmc
+        ### helium local energy
+        r1 = np.array(x[0:3])
+        r2 = np.array(x[3:])
+#        r1_len = np.sqrt(x[0]**2 + x[1]**2 + x[2]**2)
+#        r2_len = np.sqrt(x[3]**2 + x[4]**2 + x[5]**2)
 
-        inputs: x(array), denoting iter number of sample points, given by
-            metropolis hastings
+        r1_len = np.linalg.norm(r1)
+        r2_len = np.linalg.norm(r2)
 
-        output:
-            array of function values
+        r1_hat = r1 / r1_len
+        r2_hat = r2 / r2_len
+
+        r12 = np.sqrt((x[0]-x[3])**2 + (x[1]-x[4])**2 + (x[2]-x[5])**2)
+
+        return (-4 + np.dot(r1_hat - r2_hat, r1 - r2 ) / (r12 * (1+alpha*r12)**2)
+                - 1/ (r12*(1+alpha*r12)**3)
+                - 1/ (4*(1+alpha*r12)**4)
+                + 1/ r12 )
+
+
+    def mcmc_p(self, x, alpha):
+        '''
+        this is the integrand function for mcmc
 
         '''
-        multiplier = 1
+        ### helium wavefunction squared
+        r1 = np.array(x[0:3])
+        r2 = np.array(x[3:])
+        r1_len = np.linalg.norm(r1)
+        r2_len = np.linalg.norm(r2)
+        r12 = np.sqrt((x[0]-x[3])**2 + (x[1]-x[4])**2 + (x[2]-x[5])**2)
 
-        if x < 0:
-            multiplier = 0
+        return (np.exp(-2 * r1_len)* np.exp(-2 * r2_len)
+                * np.exp(r12 / (2 * (1+ alpha*r12)))) ** 2
 
-        return np.exp(-alpha*x) * multiplier
-#        return 1 / np.sqrt(2 * np.pi) * sp.exp(-(x+4) ** 2 /2)
+
+    def running_mean(self, x, N):
+    # '''This is a helper function for computing the running mean'''
+        cumsum = np.cumsum(np.insert(x, 0, 0))
+
+        return (cumsum[N:] - cumsum[:-N]) / float(N)
 
     def __enter__(self):
         return self
@@ -287,12 +308,7 @@ class MontyPython():
         print('MontyPython object self-destructing')
 
 
-def running_mean(x, N):
-    ''' This is a helper function for computing the running mean
-    '''
-    cumsum = np.cumsum(np.insert(x, 0, 0))
 
-    return (cumsum[N:] - cumsum[:-N]) / float(N)
 
 
 # m = MontyPython()
@@ -302,10 +318,10 @@ class MiniMiss():
     def __init__(self):
         print('MiniMiss optimisation machine initialised and ready!')
 
-    def minimise(self, func, guess):
+    def minimise(self, func, guess, ftol):
         starttime = time.time()
 
-        temp = optimize.fmin(func, guess, full_output = 1)
+        temp = optimize.fmin(func, guess, full_output = 1, ftol = ftol)
 
         endtime = time.time()
         elapsedtime = endtime - starttime
