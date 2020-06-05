@@ -6,7 +6,7 @@ Initial parameter guess (atomic untis) = 2.0
 Optimised parameter (atomic units) = [2.05]
 Optimised function value (atomic units) = -2.84314083552535
 Number of iterations = 32
-Comments = (None)
+Comments = derived local energy function
 
 ##########
 Datetime = 05/06/2020 17:08:00
@@ -15,7 +15,7 @@ Initial parameter guess (atomic untis) = 2.0
 Optimised parameter (atomic units) = [2.00625]
 Optimised function value (atomic units) = -2.8524526108308197
 Number of iterations = 31
-Comments = (None)
+Comments = derived local energy function
 
 ##########
 Datetime = 05/06/2020 17:09:03
@@ -24,7 +24,7 @@ Initial parameter guess (atomic untis) = 2.0
 Optimised parameter (atomic units) = [1.98759766]
 Optimised function value (atomic units) = -2.8449121651546867
 Number of iterations = 29
-Comments = (None)
+Comments = derived local energy function
 
 ##########
 Datetime = 05/06/2020 17:10:20
@@ -33,4 +33,13 @@ Initial parameter guess (atomic untis) = 2.0
 Optimised parameter (atomic units) = [2.2]
 Optimised function value (atomic units) = -2.8501352092025907
 Number of iterations = 32
-Comments = (None)
+Comments = derived local energy function
+
+##########
+Datetime = 05/06/2020 17:20:58
+Time taken (s) = 632.5299067497253
+Initial parameter guess (atomic untis) = 2.0
+Optimised parameter (atomic units) = [1.69960938]
+Optimised function value (atomic units) = -2.8711864475393765
+Number of iterations = 33
+Comments = textbook local energy function
