@@ -40,7 +40,7 @@ from numba import jit, njit
 class MontyPython():
 
     ### initialisation protocol for monteCarlo object
-    def __init__(self):
+    def __init__(self, dimensions = 2):
         self.hbar = sc.hbar
         self.mass_e = sc.electron_mass
         self.q = sc.elementary_charge
@@ -55,14 +55,14 @@ class MontyPython():
         # These are for the uniform sampling integrator
         self.n = 1000
         self.bounds = [(-1,1),(-1,1)]
-        self.dims = 2
+        self.dims = dimensions
 
 #        print(self.integrator_basic())
 #        print(self.sampler(self.bounds))
 
         # This the implementation for the Metropolis Algorithm of integration
         print('\n\nMontyPython integrator initialised and ready! Dimensions = {}\n\n'.format(self.dims))
-        print(self.integrator_mcmc(self.integrand_mcmc_p, self.integrand_mcmc_q, np.zeros(1), 10000, 10, alpha= 1.))
+        # print(self.integrator_mcmc(self.integrand_mcmc_p, self.integrand_mcmc_q, np.zeros(1), 10000, 10, alpha= 1.))
 
 
 ### These helper functions concern the basic Monte Carlo Integrator
@@ -157,6 +157,9 @@ class MontyPython():
         '''
         vals = np.zeros(avg_iter)
         val_errors = np.zeros(avg_iter)
+
+        alpha = np.array([alpha])
+
 
         for i in range(avg_iter):
             mc_samples = self.metropolis_hastings(pfunc, sample_iter, initial_point, alpha)
@@ -293,7 +296,7 @@ def running_mean(x, N):
     return (cumsum[N:] - cumsum[:-N]) / float(N)
 
 
-m = MontyPython()
+# m = MontyPython()
 
 class MiniMiss():
 

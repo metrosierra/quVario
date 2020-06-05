@@ -46,39 +46,49 @@ class HamLet():
         with PsiLet() as psi:
             self.bases = psi.bases
             self.alphas = psi.alphas
-            self.trial = parse_expr(psi.manualfunc())
-            self.e_local = parse_expr(psi.manual2())
+            self.trial = parse_expr(psi.manual1())
+            # self.e_local = parse_expr(psi.manual2())
             #for convenience
             self.r01 = parse_expr(psi.r01)
             self.r0 = parse_expr(psi.r0)
             self.r1 = parse_expr(psi.r1)
-        self.bases.append(self.alphas)
         self.variables = [a for b in self.bases for a in b]
 
 
     #custom 'numbafy' protocol. adapted from Prof Slavic (jankoslavic)
-    def numbafy(self, expression, parameters=None, constants=None, name='trial_func'):
-            code_parameters = ''
-            code_constants = ''
-            if parameters:
-                code_parameters = ', '.join(f'{p}' for p in parameters)
-            if constants:
-                code_constants = []
-                for k, v in constants.items():
-                    code_constants.append(f'{k} = {v}')
-                code_constants = '\n    '.join(code_constants)
+    def numbafy(self, expression, coordinates = None, parameters = None, name='trial_func'):
 
-            temp = lambdastr((), expression)
-            temp = temp[len('lambda : '):]
-            code_expression = f'{temp}'
+        if coordinates:
+            code_coord = []
+            for i, x in enumerate(coordinates):
+                code_coord.append(f'{x} = coordinates[{i}]')
+            code_coord = '\n    '.join(code_coord)
 
-            template = f"""
+        if parameters:
+            code_param = []
+            for i, x in enumerate(parameters):
+                code_param.append(f'{x} = parameters[{i}]')
+            code_param = '\n    '.join(code_param)
+#             if constants:
+#                 code_constants = []
+#                 for k, v in constants.items():
+#                     code_constants.append(f'{k} = {v}')
+#                 code_constants = '\n    '.join(code_constants)
+
+        temp = lambdastr((), expression)
+        temp = temp[len('lambda : '):]
+        code_expression = f'{temp}'
+
+        template = f"""
 @njit(parallel = True)
-def {name}({code_parameters}):
-    {code_constants}
+def {name}(coordinates, parameters):
+
+    {code_coord}
+    {code_param}
+
     return {code_expression}"""
-            print('function made!!! It is called ', name)
-            return template
+        print('Function template generated! Its name is ', name)
+        return template
 
 
     def he_getfuncs(self):
@@ -168,7 +178,7 @@ class PsiLet():
     def getfunc(self):
         pass
 
-    def manualfunc(self):
+    def manual1(self):
         self.r0 = '(x0**2 + y0**2 + z0**2)**0.5'
         self.r1 = '(x1**2 + y1**2 + z1**2)**0.5'
         self.r01 = '((x0-x1)**2 + (y0-y1)**2 + (z0-z1)**2)**0.5'
@@ -184,8 +194,6 @@ class PsiLet():
         self.dot01 = 'x0*x1 + y0*y1 + z0*z1'
 
         expr = f"""-4 + ({self.r0} + {self.r1})*(1 - {self.dot01}/({self.r0}*{self.r01}))/({self.r01}*(1+alpha0*{self.r01})**2) - 1/({self.r01}*(1+alpha0*{self.r01})**3) - 1/(4*{self.r01}*(1+alpha0*{self.r01})**4) + 1/{self.r01}"""
-
-        expr =
         return expr
 
     def __enter__(self):
@@ -198,11 +206,13 @@ class PsiLet():
 #
 # variables, lolz = ham.he_elocal()
 #
-# q = ham.numbafy(lolz, parameters = variables)
+# q = ham.numbafy(lolz, ham.variables, ham.alphas)
 # exec(q)
-# p = ham.numbafy(ham.e_local, parameters = variables, name= 'trial2' )
-# exec(p)
-# hi = trial_func(1,1,1,2,1,2,2)
-# hi2 = trial2(1,1,1,2,1,2,2)
+# # p = ham.numbafy(ham.e_local, parameters = variables, name= 'trial2' )
+# # exec(p)
+# trial = np.array([1,1,1,2,1,2,])
+# alpha = np.array([1])
+# hi = trial_func(trial, alpha)
+# # hi2 = trial2([1,1,1,2,1,2,2])
 #
-# print(hi,hi2)
+# print(hi)
