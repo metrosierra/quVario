@@ -23,8 +23,8 @@ class Noble():
         self.ham = psiham.HamLet()
         self.gen_q()
         self.gen_p()
-        self.final_comp()
-
+        self.gen_pp()
+        self.finalfinal()
 
 
 #    def get_functions(self):
@@ -42,12 +42,17 @@ class Noble():
         temp = self.ham.numbafy(expr, coordinates = variables, parameters = self.ham.alphas, name = 'pfunc')
         exec(temp, globals())
 
+    def gen_pp(self):
+        temp = self.ham.numbafy(self.ham.elocal, coordinates = self.ham.variables, parameters = self.ham.alphas, name = 'pp')
+        exec(temp, globals())
 
-    def final_comp(self):
-        hi = self.monty.integrator_mcmc(pfunc, qfunc, np.zeros(1), 10000, 10, alpha= 1.)
-        print(hi)
 
+    def final_comp(self, args):
+        hi = self.monty.integrator_mcmc(pfunc, pp, np.array([1,1,1,1,1,2]), 10000, 10, alpha = float(args))
+        return hi[0]
 
+    def finalfinal(self):
+        self.mini.minimise(func = self.final_comp, guess = 2.0)
 
 
 

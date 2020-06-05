@@ -36,11 +36,10 @@ import mcint
 import random
 from numba import jit, njit
 
-
 class MontyPython():
 
     ### initialisation protocol for monteCarlo object
-    def __init__(self, dimensions = 2):
+    def __init__(self, dimensions = 2, withplot = False):
         self.hbar = sc.hbar
         self.mass_e = sc.electron_mass
         self.q = sc.elementary_charge
@@ -50,7 +49,7 @@ class MontyPython():
 
 
         # Variable used to control for one set of plots
-        self.plotgraph = True
+        self.plotgraph = withplot
 
         # These are for the uniform sampling integrator
         self.n = 1000
@@ -140,7 +139,6 @@ class MontyPython():
 
 
 ### These helper functions concern the Metropolis algorithm implementation of the integral
-#    @njit
     def integrator_mcmc(self, pfunc, qfunc, initial_point, sample_iter, avg_iter, alpha):
         ''' fancy metropolis hastings integrator! where pfunc and qfunc give the
         function f you want to integrate over.
@@ -164,20 +162,18 @@ class MontyPython():
         for i in range(avg_iter):
             mc_samples = self.metropolis_hastings(pfunc, sample_iter, initial_point, alpha)
             mc_samples = np.array(mc_samples)
-
             func_vals = []
 
             # obtain arithmetic average of sampled Q values
             for array in mc_samples:
                 func_vals.append(qfunc(array, alpha))
-
+                # print(qfunc(array, alpha))
             sums = np.sum(func_vals)
 
             vals[i] = (sums/sample_iter)
         # also calculate the variance
         vals_squared = np.sum(vals**2)
-
-        vals_avg = np.sum(vals)/ avg_iter
+        vals_avg = np.sum(vals) / avg_iter
 
         for i in range (avg_iter):
 
@@ -185,10 +181,10 @@ class MontyPython():
 
         result = vals_avg
         error = np.sum(val_errors)/ np.sqrt(avg_iter)
-
+        print('Iteration cycle complete, result = ', result, 'error = ', error)
         return result, error
 
-#    @njit
+    # @njit
     def metropolis_hastings(self, pfunc, iter, initial_pt, alpha):
         ''' Metropolis algorithm for sampling from a function q based on p
 
@@ -222,7 +218,7 @@ class MontyPython():
 
             # if the ratio is greater than one, accepept the proposal
             # else, accept with probability of the ratio
-            if proposed_pt != 0:
+            if np.sum(proposed_pt) != 0:
                 if np.random.rand() < pfunc(proposed_pt, alpha) / pfunc(initial_pt, alpha):
                     initial_pt = proposed_pt
 
@@ -231,20 +227,23 @@ class MontyPython():
 
         ### Some indicator for the running average of the points, looking at whether we should
         ### discard some of the initial samples or not
-        if self.plotgraph:
-            for i in range(dims):
-                plt.plot(samples)
-                plt.plot(running_mean(samples, 50))
-                plt.show()
-
-            ### Some graphs of the sample locations! Should look a lot like pfunc!
-                plt.hist(samples, bins=np.arange(0,5,0.2))
-                plt.title('Sample histogram for random walk')
-                plt.ylabel('Number')
-                plt.xlabel('Sample locations')
-                plt.show()
-
-            self.plotgraph = False
+        # if self.plotgraph:
+        #     for i in range(dims):
+        #         plt.plot(samples)
+        #         plt.plot(running_mean(samples, 50))
+        #         plt.show(block = False)
+        #         plt.pause(0.7)
+        #         plt.close()
+        #
+        #     ### Some graphs of the sample locations! Should look a lot like pfunc!
+        #         plt.hist(samples, bins=np.arange(0,5,0.2))
+        #         plt.title('Sample histogram for random walk')
+        #         plt.ylabel('Number')
+        #         plt.xlabel('Sample locations')
+        #         plt.show(block = False)
+        #         plt.pause(0.7)
+        #         plt.close()
+        #     self.plotgraph = False
 
         return samples
 
@@ -303,10 +302,10 @@ class MiniMiss():
     def __init__(self):
         print('MiniMiss optimisation machine initialised and ready!')
 
-    def minimise(self, expr, guess, args):
+    def minimise(self, func, guess):
         starttime = time.time()
 
-        temp = optimize.fmin(func, guess, args = (args), full_output = 1)
+        temp = optimize.fmin(func, guess, full_output = 1)
 
         endtime = time.time()
         elapsedtime = endtime - starttime

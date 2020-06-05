@@ -47,6 +47,7 @@ class HamLet():
             self.bases = psi.bases
             self.alphas = psi.alphas
             self.trial = parse_expr(psi.manual1())
+            self.elocal = parse_expr(psi.manual2())
             # self.e_local = parse_expr(psi.manual2())
             #for convenience
             self.r01 = parse_expr(psi.r01)
