@@ -56,7 +56,8 @@ class HamLet():
         self.variables = [a for b in self.bases for a in b]
 
 
-    def numbafy(self, expression, parameters=None, constants=None, new_function_name='trial_func'):
+    #custom 'numbafy' protocol. adapted from Prof Slavic (jankoslavic)
+    def numbafy(self, expression, parameters=None, constants=None, name='trial_func'):
             code_parameters = ''
             code_constants = ''
             if parameters:
@@ -73,10 +74,10 @@ class HamLet():
 
             template = f"""
 @njit(parallel = True)
-def {new_function_name}({code_parameters}):
+def {name}({code_parameters}):
     {code_constants}
     return {code_expression}"""
-            print('function made!!!')
+            print('function made!!! It is called ', name)
             return template
 
 
@@ -94,10 +95,10 @@ def {new_function_name}({code_parameters}):
         return (self.variables, self.trial)
 
     def he_operate(self, expr):
-        lap1 = -0.5*self.laplace(self.trial, 0)
-        lap2 = -0.5*self.laplace(self.trial, 1)
-        attract = -(2/self.r0 + 2/self.r1)
-        repel = 1/self.r01
+        lap1 = -0.5*self.laplace(expr, 0)
+        lap2 = -0.5*self.laplace(expr, 1)
+        attract = -2*(1/self.r0 + 1/self.r1)*expr
+        repel = (1/self.r01)*expr
         return lap1 + lap2 + attract + repel
 
 
@@ -117,7 +118,6 @@ def {new_function_name}({code_parameters}):
             grad = [sy.diff(expr, r), 1/r * sy.diff(expr, t), 1/(r*sin(t)) * sy.diff(expr, p)]
             lap = (1/r**2)*sy.diff(r**2 * grad[0], r) + (1/(r*sin(t)))*(sy.diff(grad[1] * sin(t), t) + sy.diff(grad[2], p))
 
-        print(lap)
         return lap
 
     def __enter__(self):
@@ -174,6 +174,7 @@ class PsiLet():
         self.r01 = '((x0-x1)**2 + (y0-y1)**2 + (z0-z1)**2)**0.5'
 
         expr = f'''exp(-2*{self.r0}-2*{self.r1}+{self.r01}/(2*(1+alpha0*{self.r01})))'''
+        # expr = f'exp(-alpha0*({self.r0} + {self.r1}))'
         return expr
 
     def manual2(self):
@@ -184,6 +185,7 @@ class PsiLet():
 
         expr = f"""-4 + ({self.r0} + {self.r1})*(1 - {self.dot01}/({self.r0}*{self.r01}))/({self.r01}*(1+alpha0*{self.r01})**2) - 1/({self.r01}*(1+alpha0*{self.r01})**3) - 1/(4*{self.r01}*(1+alpha0*{self.r01})**4) + 1/{self.r01}"""
 
+        expr =
         return expr
 
     def __enter__(self):
@@ -192,12 +194,15 @@ class PsiLet():
     def __exit__(self, e_type, e_val, traceback):
         print('psiLet object self-destructing')
 
-ham = HamLet()
-
-variables, expr = ham.he_elocal()
-
-q = ham.numbafy(expr, parameters = variables)
-exec(q)
-
-hi = trial_func(1,1,1,1,1,2,2.3)
-print(hi)
+# ham = HamLet()
+#
+# variables, lolz = ham.he_elocal()
+#
+# q = ham.numbafy(lolz, parameters = variables)
+# exec(q)
+# p = ham.numbafy(ham.e_local, parameters = variables, name= 'trial2' )
+# exec(p)
+# hi = trial_func(1,1,1,2,1,2,2)
+# hi2 = trial2(1,1,1,2,1,2,2)
+#
+# print(hi,hi2)

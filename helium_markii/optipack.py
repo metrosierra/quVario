@@ -65,30 +65,6 @@ class MontyPython():
         print(self.integrator_mcmc(self.integrand_mcmc_p, self.integrand_mcmc_q, np.zeros(1), 10000, 10, alpha= 1.))
 
 
-    def 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ### These helper functions concern the basic Monte Carlo Integrator
     def get_measure(self, bounds):
         ''' obtains n dimensional 'measure' for the integral, which effectively
