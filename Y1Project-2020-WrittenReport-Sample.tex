@@ -1,0 +1,208 @@
+%% Y1Project-2020-WrittenReport-Sample.tex
+%% v1.1.1
+%% by Yoshi Uchida
+%% 
+%% The Y1Project is being run very differently to accommodate the constraints
+%% which arise from COVID19. The Written Report is of a very different style
+%% to other labe reports, and hence this is a sample report which should 
+%% provide a guide for the nature of the content and length
+%%
+%% bare_lab_report.tex
+%% V1.1 
+%% by Stuart Mangles
+%%
+%% This is a skeleton file demonstrating the use of imperial_lab_report.cls to 
+%% prepare lab reports for Imperial College Physics undergraduates
+%% it is based on the IEEE transactions journal style.
+%%
+%%
+%%
+%% based on bare_jrnl.tex
+%% V1.4b
+%% 2015/08/26
+%% by Michael Shell
+%% see http://www.michaelshell.org/
+%% for current contact information.
+%%
+%% This is a skeleton file demonstrating the use of IEEEtran.cls
+%% (requires IEEEtran.cls version 1.8b or later) with an IEEE
+%% journal paper.
+%%
+%% Support sites:
+%% http://www.michaelshell.org/tex/ieeetran/
+%% http://www.ctan.org/pkg/ieeetran
+%% and
+%% http://www.ieee.org/
+
+%%*************************************************************************
+%% Legal Notice:
+%% This code is offered as-is without any warranty either expressed or
+%% implied; without even the implied warranty of MERCHANTABILITY or
+%% FITNESS FOR A PARTICULAR PURPOSE! 
+%% User assumes all risk.
+%% In no event shall the IEEE or any contributor to this code be liable for
+%% any damages or losses, including, but not limited to, incidental,
+%% consequential, or any other damages, resulting from the use or misuse
+%% of any information contained here.
+%%
+%% All comments are the opinions of their respective authors and are not
+%% necessarily endorsed by the IEEE.
+%%
+%% This work is distributed under the LaTeX Project Public License (LPPL)
+%% ( http://www.latex-project.org/ ) version 1.3, and may be freely used,
+%% distributed and modified. A copy of the LPPL, version 1.3, is included
+%% in the base LaTeX documentation of all distributions of LaTeX released
+%% 2003/12/01 or later.
+%% Retain all contribution notices and credits.
+%% ** Modified files should be clearly indicated as such, including  **
+%% ** renaming them and changing author support contact information. **
+%%*************************************************************************
+
+\documentclass[12pt,a4paper,onecolumn]{Imperial_lab_report}
+\usepackage{hyperref} % provides \url{URL}
+
+% correct bad hyphenation here
+\hyphenation{Mili-voje-vic} % In case Luka needs to be mentioned
+
+\begin{document}
+% paper title
+% Titles are generally capitalized except for words such as a, an, and, as,
+% at, but, by, for, in, nor, of, on, or, the, to and up, which are usually
+% not capitalized unless they are the first or last word of the title.
+% Linebreaks \\ can be used within to get better formatting as desired.
+% Do not put math or special symbols in the title.
+\title{Measurement, Modelling and Analysis\\
+of the Blackett Laboratory Lifts and\\
+Development of Alternative Algorithms}
+
+
+\author{Project Team FAKE: Marie Curie and Abdus Salam\\
+Supervisor: Yoshi Uchida\\
+~\\ % getting the date to appear is quite difficult with this class
+22 June 2020}
+
+% The paper headers
+\markboth{Team FAKE}{}
+
+% make the title area
+\maketitle
+
+% As a general rule, do not put math, special symbols or citations
+% in the abstract or keywords.
+\begin{abstract}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% This is the Abstract for the project (rather than the report itself, %
+% which is not a standard lab report), and is the same as the          %
+% "Description" text when the Video Presentation is submitted on       %
+% Microsoft Teams, which also implies that this text will be available %
+% for the public to view                                               %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+The usage demand for the Blackett Laboratory lifts has been measured, as well as the response to this demand by the lifts. These measurements were translated into independent simulations for the demand and response. These have been validated using metrics such as the mean, median and 90th-percentile wait times have been use to compare the simulations with data. Finally, alternative response algorithms for the lifts have been studied, with improvements on the order of 30\% on the 90th-percentile wait times being possible. [This Abstract, which is for the Project, not simply the Report, would also be copied into the Description box when the Video Presentation is uploaded.]
+\end{abstract}
+
+
+\section{Background}
+% describe the starting point, be it a YouTube video of someone doing something that you intend to improve on, a paper or a popular article, or just an idea that you had. The goals of your project after the first one or two meetings with your Supervisor would be reflected in this
+The main concept for the project was to study the Blackett Laboratory lifts, taking data and modelling them using computer simulations. The original idea came from our supervisor, but from that point onwards, the work was led entirely by the team members.
+This is a fake project report with nonsense content, which has been written for the sole purpose of provide a rough guide to how a Y1Project 2020 Written Report should be proportioned.
+
+The initial goals were: 
+\begin{itemize}
+  \item to collect enough data on the usage and response of the lifts such that we could characterise the nature of the problem, allowing initial simulation work to commence;
+  \item to decide how the lift demand and response simulations would operate, and express them in the form of flowcharts etc.;
+  \item to implement simulations for the usage demand and lift response that modelled reality reasonably well;
+  \item to define metrics to measure and quantify the differences between simulations and/or real data;
+  \item to compare our simulations with reality and give an indication of how well they work.
+\end{itemize}
+Extended goals were:
+\begin{itemize}
+  \item to take further data in an improved way to help improve the accuracy of the inputs;
+  \item to incorporate lift response models that would possibly improve on the algorithms that are in use in reality
+\end{itemize}
+% You must have at least 2 lines in the paragraph with the drop letter
+% (should never be an issue)
+
+\section{Description of Project Work} % This is the "Brief Description of Project Work", 
+% but it's better not to include the word "Brief" in the actual heading
+%
+%    * outline how the project unfolded, and who did what, including approximate hours per week
+%    * technical information should be summarised here too:
+%      * computing language used, lines of code written, computing resources employed
+%        * do not include any actual code, however
+%      * items purchased or 3D-printed, including cost (save the receipts for reimbursement)
+%      * equipment or locations that were used etc.
+\subsection{Project start-up}
+The project commenced on the 7th of May 2099, with an initial meeting with our Supervisor in the first week as well as two online meetings amongst the two team members (MSC and AS).
+We continued having weekly meetings with the Supervisor and a written status report that was emailed to them weekly, with the author alternating between MSC and AS.
+MSC and AS met several times a week to work on the project.
+We spent two days deciding together how best to take data on the lifts' usage and response, and created an online form to help us fill this information in easily. 
+\subsection{Initial data-taking and algorithm development}
+Data-taking at the Blackett Lifts was initially performed over three days from 11.30am to 3.30pm on the 20th to the 22nd of May, with MSC and AS alternating between `inside' and `outside' roles.
+The key algorithms for the two types of simulation (demand and response) were initially worked on independently over two weeks from 22 May by MSC and AS respectively, with the two agreeing on the format for transferring information from one to the other after about one week.
+The demand simulation was written in Perl 6, and the response simulation was written in C++.
+The week from 1 June onwards was spent studying and validating each others' code, checking that the algorithms were working in the way that the documentation stated.
+At the same time, we brainstormed further on the possibilities for improvements to the lift response algorithms, and together came up with the definitions of the metrics we would use to characterise the results, with significant input from our Supervisor.
+\subsection{Running of simulations}
+We had wanted to take more data later in the project, to help us produce more accurate simulations, but we decided that was not possible, so we decided to use hand-picked numbers to help produce on- and off-peak demand simulations.
+The demand simulations were run by MSC on standard Blackett PCs during the second week of June, during the exams, and produced the equivalent of 10 years' worth of lift-demand data.
+\subsection{Pursuing extended goals and finalising results}
+During the week of 17 June, AS coded up the three alternative response algorithms, and MSC fed the simulated demand data to the response simulation, allowing the four algorithms to be compared.
+For the Video Presentation, MSC worked on the explaining the demand simulation and its outputs, and AS worked on the response simulation.
+The final results were put together by both MSC and AS, and this report was written by us in equal parts, using an online shared-document system, or rather we would have done so if this project were not fake and completely made up by our supervisor.
+\subsection{Equipment used and purchased}
+Most of the data-taking was performed using our own smartphones as time-keeping and data-recording devices, and a battery-powered guitar amp was borrowed to amplify the sound of the on-lift smartphone, allowing the measurement of the passage of the lift through closed doors.
+
+If we had used equipment that had been purchased, we would have listed them here:
+\begin{itemize}
+  \item first thing we used, type and price
+  \item second thing we used, type and price
+  \item third thing we used, type and price
+\end{itemize}
+
+\section{Summary of Results} % again, this is the "Brief Summary of Results", but we shouldn't put
+% "Brief" in the heading -- its brevity is clear from the length of the section
+The two types of simulation were successfully implemented and validated, and four different response algorithms tested (including our model for the existing response). For the lifts' existing response, metrics such as the mean, median and 90th-percentile wait times were used to  compare the simulations with data.
+We were able to demonstrate that the simulations are able to distinguish, in principle, the differences in algorithm performance at the 1\% level, with 10 years' worth of data being simulated in a week.
+Of the three new algorithms, we found that if the lifts had a ``Close Doors'' button, a 30\% improvement on the 90th-percentile wait times may be possible at peak times.
+
+\section{Conclusion} 
+The initial goals of the project were met, and simulations written and validated for the usage demand and response for the Blackett Laboratory lifts.
+
+Unfortunately, we were not able to take enough data to make comparisons at better than the 10\% level for the 90th-percentile metric, and we now realise that the quality of data-taking could have been improved had we reorganised the way data was taken after the first few hours of experience, instead of simply trying to take data in one go at the beginning.
+One of the extended goals had been to take more data later on, but we were not confident that the coding part of the project would be completed if we had chosen to devote more time to data-taking.
+We were able to compare three alternative algorithms for the lift response, in addition to modelling the lifts as the currently operate, and that has helped us demonstrate that seemingly small changes in algorithm can have a big impact on how efficiently lifts can operate.
+
+Our supervisor says that the best way of improving the lifts' performance is to reinstate the rule that was in place when Professor Patrick M.S.~Blackett was Head of Department—that undergraduate students not be allowed to used the lifts—but we will leave it up to him to test this hypothesis.
+
+\section{Bibligraphy} 
+The literature that we consulted is listed below, with a brief comment on each item's role in the project.
+\begin{thebibliography}{}
+
+\bibitem{Barney}
+	Gina Barney and Lutfi Al-Sharif, ``Elevator Traffic Handbook: Theory and Practice 2nd Edition'',  Routledge; 2 edition (October 2, 2015), ISBN-13: 978-1138852327
+
+Consulted briefly when brainstorming for possible algorithms. Did not directly use the algorithms it contains, but settled on some simple possibilities instead. Used also to inform some of the explanations in our video.
+
+\bibitem{Perl6}
+  Brian D Foy ``Learning Perl 6'', O'Reilly Media, Inc., September 2018 ISBN: 9781491977682
+
+Perl 5 has long the best computing language ever, but one of us finally bit the bullet and went with Perl 6. Once the world has got over the Python craze, everyone will come round to Perl 6, I am sure.
+
+\bibitem{Salam:1968rm}
+  A.~Salam, ``Weak and Electromagnetic Interactions,'' Conf. Proc. C \textbf{680519} (1968), 367-377 \url{doi:10.1142/9789812795915_0034}
+
+Referred to during initial investigations to understand how lifts' constituent particles are described in a unified model of interactions.
+
+\bibitem{MCurie}
+  M.~Curie, ``Recherches sur les substances radioactives'', PhD Thesis, University of Paris, 1903
+
+Investigated whether uranium sources could be used to detect the passage of the lifts during data-taking, but preferred to use sound waves instead of radioactivity.
+
+\vspace*{0.25in} [Real projects are expected to have a much longer list of references]
+
+
+
+\end{thebibliography}
+\end{document}
+
+
