@@ -9,6 +9,9 @@ from optipack import MontyPython, MiniMiss
 import psiham
 import time
 import numpy as np
+from numba import njit
+import matplotlib.pyplot as plt
+
 
 from metronumba import integrator_mcmc, metropolis_hastings, mcmc_q, mcmc_p
 
@@ -48,12 +51,18 @@ class Noble():
 
 
     def final_comp(self, args):
-        # hi = integrator_mcmc(pfunc, qfunc, np.array([1.,1.,1.,1.,1.,2.]), 10000, 10, alpha = float(args))
-        hi = integrator_mcmc(pfunc, mcmc_q, np.array([1.,1.,1.,1.,1.,2.]), 10000, 10, alpha = float(args))
-        return hi[0]
+        # hi = integrator_mcmc(mcmc_p, qfunc, 100000, 10, alpha = float(args), dims = 6)
+        temp = integrator_mcmc(pfunc, mcmc_q, 10000, 20, alpha = float(args), dims = 6)
+        time = np.linspace(0,len(temp[2]), len(temp[2]))
+        plt.hist(temp[2])
+        plt.show(block = False)
+        plt.pause(0.5)
+        plt.close()
+
+        return temp[0]
 
     def finalfinal(self):
-        temp = self.mini.minimise(func = self.final_comp, guess = 2.0, ftol = 0.05)
+        temp = self.mini.minimise(func = self.final_comp, guess = 2.0, ftol = 0.01)
         return temp
 
     def custom_log(self, data = [], comments = None):

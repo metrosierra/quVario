@@ -55,15 +55,15 @@ class MontyPython():
         self.bounds = [(-1,1),(-1,1)]
         self.dims = dimensions
 
-        iterations = 100
-        vals = np.zeros(iterations)
-        for i in range(iterations):
-            vals[i] = self.integrator_uniform(self.integrand, np.array([-10,10]), 100000)[0]
-            print(i)
-            
-        print(np.average(vals))
-        plt.hist(vals)
-        plt.show()
+        # iterations = 100
+        # vals = np.zeros(iterations)
+        # for i in range(iterations):
+        #     vals[i] = self.integrator_uniform(self.integrand, np.array([-10,10]), 100000)[0]
+        #     print(i)
+        #
+        # print(np.average(vals))
+        # plt.hist(vals)
+        # plt.show()
 #        print(self.sampler(self.bounds))
 
         # This the implementation for the Metropolis Algorithm of integration
@@ -72,7 +72,7 @@ class MontyPython():
 
 
 ### These helper functions concern the basic Monte Carlo Integrator
-        
+
     def integrator_uniform(self, integrand, bounds, sample_iter):
         ''' using mcint package to determine the integral via uniform distribution
         sampling over an interval
@@ -84,8 +84,8 @@ class MontyPython():
                                         self.get_measure(bounds), sample_iter)
 
         return result, error
-    
-    
+
+
     def get_measure(self, bounds):
         ''' obtains n dimensional 'measure' for the integral, which effectively
             is the volume in n dimensional space of the integral bounds. used for
@@ -99,14 +99,14 @@ class MontyPython():
                 measure: float
         '''
         measure = 1
-        
+
         if bounds.ndim == 1:
             dimlength = bounds[1] - bounds[0]
             measure *= dimlength
 
-        else:  
+        else:
             for i in bounds:
-            
+
                 dimlength = i[1] - i[0]
                 measure *= dimlength
 
@@ -127,17 +127,17 @@ class MontyPython():
         while True:
 
             sample = ()
-            
+
             if bounds.ndim == 1:
                     dimsample = random.uniform(bounds[0],bounds[1])
                     x = list(sample)
                     x.append(dimsample)
                     sample = tuple(x)
-                
+
             else:
                 for i in bounds:
                     dimsample = random.uniform(i[0],i[1])
-        
+
                     x = list(sample)
                     x.append(dimsample)
                     sample = tuple(x)
@@ -155,10 +155,10 @@ class MontyPython():
         return x[0]**2 * sp.exp(-(x[0]) ** 2)
 
     def combine_pq(self, pfunc, qfunc):
-        ''' multiplies p and q for the uniform integrator! 
+        ''' multiplies p and q for the uniform integrator!
         '''
         return pfunc*qfunc
-    
+
 ### These helper functions concern the Metropolis algorithm implementation of the integral
     def integrator_mcmc(self, pfunc, qfunc, initial_point, sample_iter, avg_iter, alpha):
         ''' fancy metropolis hastings integrator! where pfunc and qfunc give the
@@ -330,7 +330,7 @@ class MontyPython():
 
 
 
-m = MontyPython()
+# m = MontyPython()
 
 class MiniMiss():
 

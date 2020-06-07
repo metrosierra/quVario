@@ -133,3 +133,210 @@ Optimised parameter (atomic units) = [2.2]
 Optimised function value (atomic units) = -2.862985203970505
 Number of iterations = 40
 Comments = (None)
+
+##########
+Datetime = 07/06/2020 23:41:37
+Time taken (s) = 10.38406252861023
+Initial parameter guess (atomic untis) = 2.0
+Optimised parameter (atomic units) = [1.8625]
+Optimised function value (atomic units) = -2.8656074034837493
+Number of iterations = 46
+Comments = (None)
+
+##########
+Datetime = 07/06/2020 23:41:57
+Time taken (s) = 9.513556241989136
+Initial parameter guess (atomic untis) = 2.0
+Optimised parameter (atomic units) = [2.35]
+Optimised function value (atomic units) = -2.885692753133564
+Number of iterations = 30
+Comments = (None)
+
+##########
+Datetime = 07/06/2020 23:42:58
+Time taken (s) = 11.811014652252197
+Initial parameter guess (atomic untis) = 2.0
+Optimised parameter (atomic units) = [2.08825683]
+Optimised function value (atomic units) = -2.8710089601116127
+Number of iterations = 73
+Comments = (None)
+
+##########
+Datetime = 07/06/2020 23:44:46
+Time taken (s) = 19.232226610183716
+Initial parameter guess (atomic untis) = 2.0
+Optimised parameter (atomic units) = [2.20000019]
+Optimised function value (atomic units) = -2.9035780732495042
+Number of iterations = 201
+Comments = (None)
+
+##########
+Datetime = 07/06/2020 23:45:15
+Time taken (s) = 18.87202262878418
+Initial parameter guess (atomic untis) = 2.0
+Optimised parameter (atomic units) = [2.11796875]
+Optimised function value (atomic units) = -2.8834200247614534
+Number of iterations = 200
+Comments = (None)
+
+##########
+Datetime = 07/06/2020 23:48:27
+Time taken (s) = 29.96511936187744
+Initial parameter guess (atomic untis) = 2.0
+Optimised parameter (atomic units) = [2.3]
+Optimised function value (atomic units) = -2.8394998437444454
+Number of iterations = 80
+Comments = (None)
+
+##########
+Datetime = 08/06/2020 00:35:27
+Time taken (s) = 119.46586775779724
+Initial parameter guess (atomic untis) = 2.0
+Optimised parameter (atomic units) = [2.1]
+Optimised function value (atomic units) = -2.911603822340345
+Number of iterations = 200
+Comments = (None)
+
+##########
+Datetime = 08/06/2020 00:38:04
+Time taken (s) = 23.620705127716064
+Initial parameter guess (atomic untis) = 2.0
+Optimised parameter (atomic units) = [2.37499986]
+Optimised function value (atomic units) = -2.366093636711051
+Number of iterations = 67
+Comments = (None)
+
+##########
+Datetime = 08/06/2020 00:39:34
+Time taken (s) = 67.63534498214722
+Initial parameter guess (atomic untis) = 2.0
+Optimised parameter (atomic units) = [2.15]
+Optimised function value (atomic units) = -2.863256649189091
+Number of iterations = 201
+Comments = (None)
+
+##########
+Datetime = 08/06/2020 00:49:27
+Time taken (s) = 55.82743763923645
+Initial parameter guess (atomic untis) = 2.0
+Optimised parameter (atomic units) = [2.07490234]
+Optimised function value (atomic units) = -2.797072399116911
+Number of iterations = 33
+Comments = (None)
+
+##########
+Datetime = 0
+Time taken (s) = 8
+Initial parameter guess (atomic untis) = /
+Optimised parameter (atomic units) = 0
+Optimised function value (atomic units) = 6
+Number of iterations = /
+Comments = (None)
+
+##########
+Datetime = 08/06/2020 01:31:36
+Time taken (s) = 65.41271948814392
+Initial parameter guess (atomic untis) = 2.0
+Optimised parameter (atomic units) = [2.10004883]
+Optimised function value (atomic units) = -2.6603509121330005
+Number of iterations = 34
+Comments = (None)
+
+##########
+Datetime = 08/06/2020 01:44:09
+Time taken (s) = 33.10769772529602
+Initial parameter guess (atomic untis) = 2.0
+Optimised parameter (atomic units) = [1.9]
+Optimised function value (atomic units) = -2.8068942424664534
+Number of iterations = 29
+Comments = (None)
+
+##########
+Datetime = 08/06/2020 01:44:54
+Time taken (s) = 35.95344614982605
+Initial parameter guess (atomic untis) = 2.0
+Optimised parameter (atomic units) = [1.9]
+Optimised function value (atomic units) = -2.8133845393859476
+Number of iterations = 42
+Comments = (None)
+
+##########
+Datetime = 08/06/2020 01:52:11
+Time taken (s) = 2.5846681594848633
+Initial parameter guess (atomic untis) = 2.0
+Optimised parameter (atomic units) = [2.18120117]
+Optimised function value (atomic units) = -3.028973832361327
+Number of iterations = 201
+Comments = (None)
+
+##########
+Datetime = 08/06/2020 01:52:43
+Time taken (s) = 7.598971605300903
+Initial parameter guess (atomic untis) = 2.0
+Optimised parameter (atomic units) = [2.05]
+Optimised function value (atomic units) = -2.8203908319245867
+Number of iterations = 42
+Comments = (None)
+
+##########
+Datetime = 08/06/2020 01:53:15
+Time taken (s) = 21.499916553497314
+Initial parameter guess (atomic untis) = 2.0
+Optimised parameter (atomic units) = [2.0625]
+Optimised function value (atomic units) = -2.801213574619545
+Number of iterations = 27
+Comments = (None)
+
+##########
+Datetime = 08/06/2020 01:54:15
+Time taken (s) = 30.22997236251831
+Initial parameter guess (atomic untis) = 2.0
+Optimised parameter (atomic units) = [2.196875]
+Optimised function value (atomic units) = -2.8258954448202793
+Number of iterations = 39
+Comments = (None)
+
+##########
+Datetime = 08/06/2020 02:11:56
+Time taken (s) = 38.480260372161865
+Initial parameter guess (atomic untis) = 2.0
+Optimised parameter (atomic units) = [1.8]
+Optimised function value (atomic units) = -2.840169633206802
+Number of iterations = 42
+Comments = (None)
+
+##########
+Datetime = 08/06/2020 02:15:28
+Time taken (s) = 32.11808967590332
+Initial parameter guess (atomic untis) = 2.0
+Optimised parameter (atomic units) = [1.89960937]
+Optimised function value (atomic units) = -2.8138815299502693
+Number of iterations = 39
+Comments = (None)
+
+##########
+Datetime = 08/06/2020 02:23:21
+Time taken (s) = 29.38150668144226
+Initial parameter guess (atomic untis) = 2.0
+Optimised parameter (atomic units) = [2.10156555]
+Optimised function value (atomic units) = -2.886565198204486
+Number of iterations = 46
+Comments = (None)
+
+##########
+Datetime = 08/06/2020 02:24:42
+Time taken (s) = 36.3257896900177
+Initial parameter guess (atomic untis) = 2.0
+Optimised parameter (atomic units) = [2.05001221]
+Optimised function value (atomic units) = -2.8174243471985614
+Number of iterations = 42
+Comments = (None)
+
+##########
+Datetime = 08/06/2020 02:25:30
+Time taken (s) = 30.77509903907776
+Initial parameter guess (atomic untis) = 2.0
+Optimised parameter (atomic units) = [1.909375]
+Optimised function value (atomic units) = -2.8177820292903655
+Number of iterations = 35
+Comments = (None)

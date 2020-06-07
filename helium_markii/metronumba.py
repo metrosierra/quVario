@@ -19,54 +19,61 @@ import numba as nb
 from numba import jit, njit
 
 @njit
-def metropolis_hastings(pfunc, iter, initial_pt, alpha):
+def metropolis_hastings(pfunc, iter, alpha, dims):
 
-    step_size = 3
-    dim = len(initial_pt)
-    # print(dim)
-    samples = np.zeros((iter, dim))
+    initial_pt = 2*np.random.rand(dims) - 1.0
+    step_scale = 0.4
 
+    samples = np.zeros((iter, dims))
+    reject_ratio = 0.
+    test = []
     # now sample iter number of points
     for i in range(iter):
         # we propose a new point using a Symmetric transition distribution function: a Gaussian
-        walk = step_size * np.random.rand(6) - step_size/2
+        walk = step_scale * np.random.rand(6) - step_scale/2
         proposed_pt = initial_pt + walk
 
-        if np.random.rand() < pfunc(proposed_pt, alpha) / pfunc(initial_pt, alpha):
+        p = pfunc(proposed_pt, alpha) / pfunc(initial_pt, alpha)
+        # print(p)
+        test.append(p)
+        if p >= 1.:
             initial_pt = proposed_pt
+        if np.random.rand() <= p:
+            initial_pt = proposed_pt
+        else:
+            reject_ratio += 1./iter
 
         samples[i] = initial_pt
-    return samples
+    return samples, reject_ratio, test
 
 
 @njit
-def integrator_mcmc(pfunc, qfunc, initial_point, sample_iter, avg_iter, alpha):
+def integrator_mcmc(pfunc, qfunc, sample_iter, avg_iter, alpha, dims):
 
+    therm = 0
     vals = np.zeros(avg_iter)
-    val_errors = np.zeros(avg_iter)
-
+    val_errors = 0.
     alpha = np.array([alpha])
 
+    test = []
     for i in range(avg_iter):
-        mc_samples = metropolis_hastings(pfunc, sample_iter, initial_point, alpha)
+        mc_samples, rejects, p = metropolis_hastings(pfunc, sample_iter, alpha, dims)
         sums = 0.
         # obtain arithmetic average of sampled Q values
-        for array in mc_samples:
+        for array in mc_samples[therm:]:
             sums += qfunc(array, alpha)
-
-        vals[i] = (sums/sample_iter)
+            test.append(qfunc(array, alpha))
+        vals[i] = (sums/(sample_iter - therm))
 
     # also calculate the variance
     vals_squared = np.sum(vals**2)
-    vals_avg = np.sum(vals) / avg_iter
+    vals_avg = np.sum(vals) /avg_iter
+    variance = vals_squared/avg_iter - (vals_avg) ** 2
+    std_error = np.sqrt(variance/avg_iter)
 
-    for i in range (avg_iter):
-        val_errors[i] = (np.sqrt(vals_squared/ avg_iter - (vals_avg) ** 2))
 
-    result = vals_avg
-    std = np.sqrt(np.sum(val_errors)/ np.sqrt(avg_iter))
-    print('Iteration cycle complete, result = ', result, 'error = ', std)
-    return result, std
+    print('Iteration cycle complete, result = ', vals_avg, 'error = ', std_error, 'rejects = ', rejects)
+    return vals_avg, std_error, test
 
 
 @njit
