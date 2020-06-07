@@ -54,10 +54,10 @@ class Noble():
         # hi = integrator_mcmc(mcmc_p, qfunc, 100000, 10, alpha = float(args), dims = 6)
         temp = integrator_mcmc(pfunc, mcmc_q, 10000, 20, alpha = float(args), dims = 6)
         time = np.linspace(0,len(temp[2]), len(temp[2]))
-        plt.hist(temp[2])
-        plt.show(block = False)
-        plt.pause(0.5)
-        plt.close()
+        # plt.hist(temp[2])
+        # plt.show(block=False)
+        # plt.pause(0.8)
+        # plt.close()
 
         return temp[0]
 

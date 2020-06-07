@@ -21,8 +21,8 @@ from numba import jit, njit
 @njit
 def metropolis_hastings(pfunc, iter, alpha, dims):
 
-    initial_pt = 2*np.random.rand(dims) - 1.0
-    step_scale = 0.4
+    initial_pt = 2.0*np.random.rand(dims) - 1.0
+    # step_scale = 0.4
 
     samples = np.zeros((iter, dims))
     reject_ratio = 0.
@@ -30,7 +30,10 @@ def metropolis_hastings(pfunc, iter, alpha, dims):
     # now sample iter number of points
     for i in range(iter):
         # we propose a new point using a Symmetric transition distribution function: a Gaussian
-        walk = step_scale * np.random.rand(6) - step_scale/2
+        walk = np.zeros(dims)
+        for x in range(len(initial_pt)):
+            walk[x] = np.random.normal(loc = 0, scale = 1.2)
+
         proposed_pt = initial_pt + walk
 
         p = pfunc(proposed_pt, alpha) / pfunc(initial_pt, alpha)

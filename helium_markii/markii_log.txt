@@ -340,3 +340,66 @@ Optimised parameter (atomic units) = [1.909375]
 Optimised function value (atomic units) = -2.8177820292903655
 Number of iterations = 35
 Comments = (None)
+
+##########
+Datetime = 08/06/2020 02:43:57
+Time taken (s) = 10.526745557785034
+Initial parameter guess (atomic untis) = 2.0
+Optimised parameter (atomic units) = [2.06166992]
+Optimised function value (atomic units) = -3.6412976779347397
+Number of iterations = 33
+Comments = (None)
+
+##########
+Datetime = 08/06/2020 02:45:14
+Time taken (s) = 12.604617834091187
+Initial parameter guess (atomic untis) = 2.0
+Optimised parameter (atomic units) = [2.2]
+Optimised function value (atomic units) = -3.6093123496236665
+Number of iterations = 40
+Comments = (None)
+
+##########
+Datetime = 08/06/2020 02:46:03
+Time taken (s) = 13.304556131362915
+Initial parameter guess (atomic untis) = 2.0
+Optimised parameter (atomic units) = [2.]
+Optimised function value (atomic units) = -2.8331360643023764
+Number of iterations = 45
+Comments = (None)
+
+##########
+Datetime = 08/06/2020 02:46:40
+Time taken (s) = 12.16994857788086
+Initial parameter guess (atomic untis) = 2.0
+Optimised parameter (atomic units) = [2.1734375]
+Optimised function value (atomic units) = -2.868845379029391
+Number of iterations = 38
+Comments = (None)
+
+##########
+Datetime = 08/06/2020 02:47:14
+Time taken (s) = 29.5515615940094
+Initial parameter guess (atomic untis) = 2.0
+Optimised parameter (atomic units) = [2.]
+Optimised function value (atomic units) = -2.8419795133555583
+Number of iterations = 32
+Comments = (None)
+
+##########
+Datetime = 08/06/2020 02:49:37
+Time taken (s) = 31.11452579498291
+Initial parameter guess (atomic untis) = 2.0
+Optimised parameter (atomic units) = [1.971875]
+Optimised function value (atomic units) = -2.8117314513035496
+Number of iterations = 33
+Comments = (None)
+
+##########
+Datetime = 08/06/2020 02:58:31
+Time taken (s) = 17.84863543510437
+Initial parameter guess (atomic untis) = 2.0
+Optimised parameter (atomic units) = [1.12480469]
+Optimised function value (atomic units) = -2.8812367678123048
+Number of iterations = 60
+Comments = (None)
