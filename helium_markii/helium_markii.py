@@ -9,9 +9,8 @@ from optipack import MontyPython, MiniMiss
 import psiham
 import time
 import numpy as np
-import types
-from numba import jit, njit
 
+from metronumba import integrator_mcmc, metropolis_hastings, mcmc_q, mcmc_p
 
 class Noble():
 
@@ -30,8 +29,8 @@ class Noble():
 
 #    def get_functions(self):
 
-    def expr1(self):
-        return self.monty.integrator_mcmc(self.pfunc, self.he_elocal)
+    # def expr1(self):
+    #     return self.monty.integrator_mcmc(self.pfunc, self.he_elocal)
 
     def gen_q(self):
         variables, expr = self.ham.he_elocal()
@@ -49,7 +48,8 @@ class Noble():
 
 
     def final_comp(self, args):
-        hi = self.monty.integrator_mcmc(pfunc, qfunc, np.array([1,1,1,1,1,2]), 10000, 10, alpha = float(args))
+        # hi = integrator_mcmc(pfunc, qfunc, np.array([1.,1.,1.,1.,1.,2.]), 10000, 10, alpha = float(args))
+        hi = integrator_mcmc(pfunc, mcmc_q, np.array([1.,1.,1.,1.,1.,2.]), 10000, 10, alpha = float(args))
         return hi[0]
 
     def finalfinal(self):

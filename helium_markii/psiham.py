@@ -203,7 +203,7 @@ class PsiLet():
     def __exit__(self, e_type, e_val, traceback):
         print('psiLet object self-destructing')
 
-# ham = HamLet()
+ham = HamLet()
 #
 # variables, lolz = ham.he_elocal()
 #

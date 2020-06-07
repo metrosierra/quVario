@@ -43,3 +43,93 @@ Optimised parameter (atomic units) = [1.69960938]
 Optimised function value (atomic units) = -2.8711864475393765
 Number of iterations = 33
 Comments = textbook local energy function
+
+##########
+Datetime = 07/06/2020 16:20:21
+Time taken (s) = 11.7021484375
+Initial parameter guess (atomic untis) = 2.0
+Optimised parameter (atomic units) = [2.0875]
+Optimised function value (atomic units) = -2.867585919356491
+Number of iterations = 29
+Comments = (None)
+
+##########
+Datetime = 07/06/2020 16:20:50
+Time taken (s) = 11.333881855010986
+Initial parameter guess (atomic untis) = 2.0
+Optimised parameter (atomic units) = [2.]
+Optimised function value (atomic units) = -2.867559293542516
+Number of iterations = 30
+Comments = (None)
+
+##########
+Datetime = 07/06/2020 17:41:02
+Time taken (s) = 4.411054611206055
+Initial parameter guess (atomic untis) = 2.0
+Optimised parameter (atomic units) = [2.021875]
+Optimised function value (atomic units) = -2.8776617965367257
+Number of iterations = 28
+Comments = (None)
+
+##########
+Datetime = 07/06/2020 17:41:28
+Time taken (s) = 4.895171880722046
+Initial parameter guess (atomic untis) = 2.0
+Optimised parameter (atomic units) = [2.01401367]
+Optimised function value (atomic units) = -2.866427877949714
+Number of iterations = 37
+Comments = (None)
+
+##########
+Datetime = 07/06/2020 17:48:40
+Time taken (s) = 5.792273998260498
+Initial parameter guess (atomic untis) = 2.0
+Optimised parameter (atomic units) = [1.78945313]
+Optimised function value (atomic units) = -2.845939588326754
+Number of iterations = 37
+Comments = (None)
+
+##########
+Datetime = 07/06/2020 17:49:07
+Time taken (s) = 5.409697532653809
+Initial parameter guess (atomic untis) = 2.0
+Optimised parameter (atomic units) = [2.203125]
+Optimised function value (atomic units) = -2.829801346011585
+Number of iterations = 33
+Comments = (None)
+
+##########
+Datetime = 07/06/2020 17:49:40
+Time taken (s) = 5.285627603530884
+Initial parameter guess (atomic untis) = 2.0
+Optimised parameter (atomic units) = [2.11210937]
+Optimised function value (atomic units) = -2.807190029472632
+Number of iterations = 31
+Comments = (None)
+
+##########
+Datetime = 07/06/2020 17:49:53
+Time taken (s) = 5.442388534545898
+Initial parameter guess (atomic untis) = 2.0
+Optimised parameter (atomic units) = [2.1]
+Optimised function value (atomic units) = -3.4579763421906393
+Number of iterations = 32
+Comments = (None)
+
+##########
+Datetime = 07/06/2020 17:50:26
+Time taken (s) = 5.564346075057983
+Initial parameter guess (atomic untis) = 2.0
+Optimised parameter (atomic units) = [2.1]
+Optimised function value (atomic units) = -2.9023512339099797
+Number of iterations = 33
+Comments = (None)
+
+##########
+Datetime = 07/06/2020 17:53:25
+Time taken (s) = 5.038026809692383
+Initial parameter guess (atomic untis) = 2.0
+Optimised parameter (atomic units) = [2.2]
+Optimised function value (atomic units) = -2.862985203970505
+Number of iterations = 40
+Comments = (None)
