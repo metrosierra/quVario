@@ -13,6 +13,8 @@
 
 ### psifunction should serve helium_markii.py which is the higher level script for direct user interface
 
+#%%%%%%%%%%%%%%%%%%
+
 import math
 import sys
 import os
@@ -47,7 +49,7 @@ class HamLet():
             self.bases = psi.bases
             self.alphas = psi.alphas
             self.trial = parse_expr(psi.manual1())
-            self.elocal = parse_expr(psi.manual2())
+            # self.elocal = parse_expr(psi.manual2())
             # self.e_local = parse_expr(psi.manual2())
             #for convenience
             self.r01 = parse_expr(psi.r01)
@@ -188,13 +190,15 @@ class PsiLet():
         # expr = f'exp(-alpha0*({self.r0} + {self.r1}))'
         return expr
 
+
+    ### this function is flawed, gives numerically incorrect result. Use with caution
     def manual2(self):
         self.r0 = '(x0**2 + y0**2 + z0**2)**0.5'
         self.r1 = '(x1**2 + y1**2 + z1**2)**0.5'
         self.r01 = '((x0-x1)**2 + (y0-y1)**2 + (z0-z1)**2)**0.5'
         self.dot01 = 'x0*x1 + y0*y1 + z0*z1'
 
-        expr = f"""-4 + ({self.r0} + {self.r1})*(1 - {self.dot01}/({self.r0}*{self.r01}))/({self.r01}*(1+alpha0*{self.r01})**2) - 1/({self.r01}*(1+alpha0*{self.r01})**3) - 1/(4*{self.r01}*(1+alpha0*{self.r01})**4) + 1/{self.r01}"""
+        expr = f'''-4 + ({self.r0} + {self.r1})*(1 - {self.dot01}/({self.r0}*{self.r1}))/({self.r01}*(1+alpha0*{self.r01})**2) - 1/({self.r01}*(1+alpha0*{self.r01})**3) - 1/(4*(1+alpha0*{self.r01})**4) + 1/{self.r01}'''
         return expr
 
     def __enter__(self):
@@ -203,7 +207,10 @@ class PsiLet():
     def __exit__(self, e_type, e_val, traceback):
         print('psiLet object self-destructing')
 
-ham = HamLet()
+#%%%%%%%%%%%%%%%%%%
+
+
+
 #
 # variables, lolz = ham.he_elocal()
 #

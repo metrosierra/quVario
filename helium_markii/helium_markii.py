@@ -25,7 +25,7 @@ class Noble():
         self.ham = psiham.HamLet()
         self.gen_q()
         self.gen_p()
-        self.gen_pp()
+        # self.gen_pp()
         self.monty.plotgraph = True
         data = self.finalfinal()
         self.custom_log(data)
