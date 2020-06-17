@@ -131,8 +131,11 @@ def integrand(x):
 def psiHpsi(x, alpha):
     ''' Local energy term
     '''
-    r1 = np.array([x[0], x[1], x[2]])
-    r2 = np.array([x[3], x[4], x[5]])
+#    r1 = np.array([x[0], x[1], x[2]])
+#    r2 = np.array([x[3], x[4], x[5]])
+    
+    r1 = x[0:2]
+    r2 = x[3:5]
     
     r1_len = np.sqrt(x[0]**2 + x[1]**2 + x[2]**2)
     r2_len = np.sqrt(x[3]**2 + x[4]**2 + x[5]**2)
@@ -153,10 +156,11 @@ def psiHpsi(x, alpha):
 #                - 1/ (r12*(1 + alpha*r12)**3)
 #                - 1/ (4*(1 + alpha*r12)**4)
 #                + 1/ r12 )  
-    EL =  (-4 + np.sum((r1_hat - r2_hat) * (r1 - r2), 0) / (r12 * (1 + alpha*r12)**2)
-                - 1/ (r12*(1 + alpha*r12)**3)
-                - 1/ (4*(1 + alpha*r12)**4)
-                + 1/ r12 )  
+    
+    EL =  (-4 + np.dot(r1_hat - r2_hat, r1 - r2 ) / (r12 * (1 + alpha*r12)**2)
+            - 1/ (r12*(1 + alpha*r12)**3)
+            - 1/ (4*(1 + alpha*r12)**4)
+            + 1/ r12 )  
         
     psisq = (np.exp(-2 * r1_len)* np.exp(-2 * r2_len)
             * np.exp(r12 / (2 * (1+ alpha*r12)))) ** 2
