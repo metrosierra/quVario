@@ -64,7 +64,6 @@ def psisq(x, alpha):
     
     return psisq
 
-#@njit
 def evalenergy(alpha): 
     @njit
     def expec(x):
@@ -73,7 +72,6 @@ def evalenergy(alpha):
     def norm(x):
         return psisq(x, alpha)
 
-#    @njit
     def main():
         # seed the random number generator so results reproducible
         np.random.seed(1)
@@ -129,15 +127,20 @@ def evalenergy(alpha):
     
     return E
     
-start_time = time.time() 
-### Run plotting function
+start_time = time.time()
+
+#%%
+### Run plotting function, opting for higher resolution near the minimum
 PLOT = True
+
+#high resolution bit
 alpha = np.linspace(0.001, 0.3, 30)
 energies = []
 for i in alpha:
     energies.append(evalenergy(i))
-plt.plot(alpha, energies)
+plt.plot(alpha, energies, color='dodgerblue')
 
+#low resolution bit
 alpha = np.linspace(0.3, 2, 10)
 energies2 = []
 for i in alpha:
@@ -146,24 +149,12 @@ for i in alpha:
 plt.xlabel('alpha')
 plt.ylabel('energy')
 plt.grid()
-plt.plot(alpha, energies2)
+plt.plot(alpha, energies2, color = 'dodgerblue')
 
+### Use optimisation to obtain the minimum
 PLOT = False
-
 result = fmin(evalenergy, .2, ftol = 0.01, xtol = 0.001, full_output=True)
 plt.plot(result[0], result[1], 'ro', ms=5)
 
 print("--- Total time: %s seconds ---" % (time.time() - start_time))
 
-#%%
-
-alpha = np.linspace(0.001, 0.3, 30)
-plt.plot(alpha, energies, color='dodgerblue')
-
-plt.xlabel('alpha')
-plt.ylabel('energy')
-plt.grid()
-alpha = np.linspace(0.3, 2, 10)
-plt.plot(alpha, energies2, color = 'dodgerblue')
-
-plt.plot(result[0], result[1], 'ro', ms=5)

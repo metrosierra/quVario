@@ -125,7 +125,6 @@ class MontyPython():
                 sample (tuple)
         '''
         while True:
-
             sample = ()
 
             if bounds.ndim == 1:
@@ -157,9 +156,9 @@ class MontyPython():
     def combine_pq(self, pfunc, qfunc):
         ''' multiplies p and q for the uniform integrator!
         '''
-        return pfunc*qfunc
+        return pfunc * qfunc
 
-### These helper functions concern the Metropolis algorithm implementation of the integral
+######## These helper functions concern the Metropolis algorithm implementation of the integral
     def integrator_mcmc(self, pfunc, qfunc, initial_point, sample_iter, avg_iter, alpha):
         ''' fancy metropolis hastings integrator! where pfunc and qfunc give the
         function f you want to integrate over.
