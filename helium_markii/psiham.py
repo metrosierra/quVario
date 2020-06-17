@@ -40,21 +40,26 @@ everything will be kept to atomic units
 '''
 
 class HamLet():
-    def __init__(self):
+    def __init__(self, trial_expr, **kwargs):
         starttime = time.time()
         print('Hamiltonian Operator object initialised')
         self.coordsys = 'cartesian'
 
-        with PsiLet() as psi:
+        with PsiLet(**kwargs) as psi:
             self.bases = psi.bases
             self.alphas = psi.alphas
-            self.trial = parse_expr(psi.manual1())
-            # self.elocal = parse_expr(psi.manual2())
-            # self.e_local = parse_expr(psi.manual2())
+            if trial_expr == 'onepara':
+                self.trial = parse_expr(psi.onepara())
+            elif trial_expr == 'twopara':
+                self.trial = parse_expr(psi.twopara())
+            elif trial_expr == 'threepara':
+                self.trial = parse_expr(psi.threepara())
+
+
             #for convenience
-            self.r01 = parse_expr(psi.r01)
-            self.r0 = parse_expr(psi.r0)
-            self.r1 = parse_expr(psi.r1)
+            self.r0 =  parse_expr(psi.r0)
+            self.r1 =  parse_expr(psi.r1)
+            self.r01 =  parse_expr(psi.r01)
         self.variables = [a for b in self.bases for a in b]
 
 
@@ -83,7 +88,7 @@ class HamLet():
         code_expression = f'{temp}'
 
         template = f"""
-@njit(parallel = True)
+@njit
 def {name}(coordinates, parameters):
 
     {code_coord}
@@ -144,9 +149,9 @@ def {name}(coordinates, parameters):
 class PsiLet():
     def __init__(self, electrons = 2, alphas = 1, coordsys = 'cartesian'):
         print('psiLet object initialised, reading input txt file (if any) for trial wavefunction')
-        self.spawn_electrons(2, coord_sys = coordsys)
+        self.spawn_electrons(electrons, coord_sys = coordsys)
         print('{} {} electron coordinate set(s) spawned'.format(electrons, coordsys))
-        self.spawn_alphas(1)
+        self.spawn_alphas(alphas)
         print('{} alpha parameter(s) spawned'.format(alphas))
 
     def spawn_electrons(self, number, coord_sys = 'cart'):
@@ -181,7 +186,7 @@ class PsiLet():
     def getfunc(self):
         pass
 
-    def manual1(self):
+    def onepara(self):
         self.r0 = '(x0**2 + y0**2 + z0**2)**0.5'
         self.r1 = '(x1**2 + y1**2 + z1**2)**0.5'
         self.r01 = '((x0-x1)**2 + (y0-y1)**2 + (z0-z1)**2)**0.5'
@@ -189,6 +194,26 @@ class PsiLet():
         expr = f'''exp(-2*{self.r0}-2*{self.r1}+{self.r01}/(2*(1+alpha0*{self.r01})))'''
         # expr = f'exp(-alpha0*({self.r0} + {self.r1}))'
         return expr
+
+
+    def twopara(self):
+        self.r0 = '(x0**2 + y0**2 + z0**2)**0.5'
+        self.r1 = '(x1**2 + y1**2 + z1**2)**0.5'
+        self.r01 = '((x0-x1)**2 + (y0-y1)**2 + (z0-z1)**2)**0.5'
+
+        expr = f'''exp(-alpha0*({self.r0}+{self.r1})+{self.r01}/(2*(1+alpha1*{self.r01})))'''
+        # expr = f'exp(-alpha0*({self.r0} + {self.r1}))'
+        return expr
+
+    def threepara(self):
+        self.r0 = '(x0**2 + y0**2 + z0**2)**0.5'
+        self.r1 = '(x1**2 + y1**2 + z1**2)**0.5'
+        self.r01 = '((x0-x1)**2 + (y0-y1)**2 + (z0-z1)**2)**0.5'
+
+        expr = f'''(exp(-alpha0*{self.r0}-alpha1*{self.r1})+exp(-alpha1*{self.r0}-alpha0*{self.r1}))*(1 + alpha2*{self.r01})'''
+        # expr = f'exp(-alpha0*({self.r0} + {self.r1}))'
+        return expr
+
 
 
     ### this function is flawed, gives numerically incorrect result. Use with caution
@@ -209,8 +234,9 @@ class PsiLet():
 
 #%%%%%%%%%%%%%%%%%%
 
-
-
+# psilet_args = {'electrons': 2, 'alphas': 2, 'coordsys': 'cartesian'}
+# ham = HamLet(trial_expr = 'twopara', **psilet_args)
+#
 #
 # variables, lolz = ham.he_elocal()
 #
@@ -218,8 +244,8 @@ class PsiLet():
 # exec(q)
 # # p = ham.numbafy(ham.e_local, parameters = variables, name= 'trial2' )
 # # exec(p)
-# trial = np.array([1,1,1,2,1,2,])
-# alpha = np.array([1])
+# trial = np.array([1,1,1,2,1,2])
+# alpha = np.array([1, 2])
 # hi = trial_func(trial, alpha)
 # # hi2 = trial2([1,1,1,2,1,2,2])
 #
