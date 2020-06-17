@@ -23,7 +23,6 @@ import matplotlib.pyplot as plt
 #    SHOW_GRID = True
     
 SHOW_GRID = False
-
 PLOT = True
 
 @njit
@@ -65,6 +64,7 @@ def psisq(x, alpha):
     
     return psisq
 
+#@njit
 def evalenergy(alpha): 
     @njit
     def expec(x):
@@ -123,9 +123,9 @@ def evalenergy(alpha):
         return E
         
 #    if __name__ == '__main__':
-    start_time = time.time()
+#    start_time = time.time()
     E = main()
-    print("--- Iteration time: %s seconds ---" % (time.time() - start_time))
+#    print("--- Iteration time: %s seconds ---" % (time.time() - start_time))
     
     return E
     
@@ -158,12 +158,12 @@ print("--- Total time: %s seconds ---" % (time.time() - start_time))
 #%%
 
 alpha = np.linspace(0.001, 0.3, 30)
-plt.plot(alpha, energies)
+plt.plot(alpha, energies, color='dodgerblue')
 
 plt.xlabel('alpha')
 plt.ylabel('energy')
 plt.grid()
-alpha = np.linspace(0.3, 2, 10, color = 'blue')
-plt.plot(alpha, energies2)
+alpha = np.linspace(0.3, 2, 10)
+plt.plot(alpha, energies2, color = 'dodgerblue')
 
 plt.plot(result[0], result[1], 'ro', ms=5)
