@@ -25,62 +25,62 @@ def Uint(integrand, sampler, bounds, n, *alpha):
         sampler: uniform sampler, function
         bounds: integral bounds, array
         n: number of samples per dimension
-    Outputs: 
+    Outputs:
     '''
-        
+
     samples = sampler(bounds, n)
-    
+
     measure = get_measure(bounds)
-    
+
     vals = integrand(samples, alpha)
     vals_sq = np.sum(vals**2)
-    
+
     # this is the value and variance of the sampled integrand values
     result = measure * np.sum(vals) / n
-    var = (vals_sq / n - ((result) ** 2)) 
-        
+    var = (vals_sq / n - ((result) ** 2))
+
     return np.array([result, var])
 
 @njit
 def iter_Uint(integrand, sampler, bounds, n, iters, *alpha):
-        ''' 
+        '''
         '''
         result = np.zeros(iters)
-        
+
 #        times = []
-        
+
         for i in range(iters):
 #            start_time = time.time()
-            
+
             x = Uint(integrand, sampler, bounds, n, alpha)
 
 
 #            duration = (time.time() - start_time)
-            
+
             result[i] = x[0]
 #            times.append(duration)
-            
+
         avg = np.sum(result) / iters
 #        print(avg)
         result_squared = result ** 2
-        
+
         var = (np.sum(result_squared) - avg **2) / (iters - 1)
 #        print(var)
 #        return np.array([avg, var, times])
         return np.array([avg, var, result])
- 
+
 @njit
 def get_energy(alpha, psiHpsi, psisq, integrand, sampler, bounds, n, iters):
-    
+
     exp = iter_Uint(psiHpsi, sampler, bounds, n, iters, alpha)[0]
     norm = iter_Uint(psisq, sampler, bounds, n, iters, alpha)[0]
-    
+
     return exp/ norm
 
 @njit
 def get_measure(bounds):
     ''' obtains n dimensional 'measure' for the integral, which effectively
-        is the volume in n dimensional space of the integral bounds. 
+        is the volume in n dimensional space of the integral bounds.
         Used for multiplying the expected value.
 
         inputs:
@@ -94,11 +94,11 @@ def get_measure(bounds):
 #    for i in bounds:
 #        dimlength = float(i[1] - i[0])
 #        measure *= dimlength
-    
+
     for i in range(len(bounds)):
         dimlength = float(bounds[i][1] - bounds[i][0])
         measure *= dimlength
-        
+
     return measure
 
 @njit
@@ -109,11 +109,11 @@ def sampler(bounds, iters):
     '''
     dims = len(bounds)
     samples = np.zeros((dims, iters))
-    
+
 #    for i,b in enumerate(bounds):
 #        dim_sample = np.random.uniform(b[0], b[1], iters)
 #        samples[i,:] = dim_sample
-        
+
     for i in range (len(bounds)):
         dim_sample = np.random.uniform(bounds[i][0], bounds[i][1], iters)
         samples[i,:] = dim_sample
@@ -123,7 +123,7 @@ def sampler(bounds, iters):
 def integrand(x):
     ''' this is the integrand function
     '''
-    return  sp.exp(-(x[0]) ** 2) * x[0]**2 
+    return  np.exp(-(x[0]) ** 2) * x[0]**2 
 
 ### Helium atom variational method
 
@@ -133,10 +133,10 @@ def psiHpsi(x, alpha):
     '''
 #    r1 = np.array([x[0], x[1], x[2]])
 #    r2 = np.array([x[3], x[4], x[5]])
-    
+
     r1 = x[0:2]
     r2 = x[3:5]
-    
+
     r1_len = np.sqrt(x[0]**2 + x[1]**2 + x[2]**2)
     r2_len = np.sqrt(x[3]**2 + x[4]**2 + x[5]**2)
 
@@ -145,26 +145,26 @@ def psiHpsi(x, alpha):
 #    print(x[0])
 
     r12 = np.sqrt((x[0]-x[3])**2 + (x[1]-x[4])**2 + (x[2]-x[5])**2)
-    
+
 #    try:
 #        EL =  (-4 + np.dot(r1_hat - r2_hat, r1 - r2 ) / (r12 * (1 + alpha*r12)**2)
 #                - 1/ (r12*(1 + alpha*r12)**3)
 #                - 1/ (4*(1 + alpha*r12)**4)
-#                + 1/ r12 )  
-#    except: 
+#                + 1/ r12 )
+#    except:
 #        EL =  (-4 + np.sum((r1_hat - r2_hat) * (r1 - r2), 0) / (r12 * (1 + alpha*r12)**2)
 #                - 1/ (r12*(1 + alpha*r12)**3)
 #                - 1/ (4*(1 + alpha*r12)**4)
-#                + 1/ r12 )  
-    
+#                + 1/ r12 )
+
     EL =  (-4 + np.dot(r1_hat - r2_hat, r1 - r2 ) / (r12 * (1 + alpha*r12)**2)
             - 1/ (r12*(1 + alpha*r12)**3)
             - 1/ (4*(1 + alpha*r12)**4)
-            + 1/ r12 )  
-        
+            + 1/ r12 )
+
     psisq = (np.exp(-2 * r1_len)* np.exp(-2 * r2_len)
             * np.exp(r12 / (2 * (1+ alpha*r12)))) ** 2
-    
+
     return psisq * EL
 
 @njit
@@ -173,19 +173,19 @@ def psisq(x, alpha):
     '''
     r1_len = np.sqrt(x[0]**2 + x[1]**2 + x[2]**2)
     r2_len = np.sqrt(x[3]**2 + x[4]**2 + x[5]**2)
-    
+
     r12 = np.sqrt((x[0]-x[3])**2 + (x[1]-x[4])**2 + (x[2]-x[5])**2)
-    
+
     psisq = (np.exp(-2 * r1_len)* np.exp(-2 * r2_len)
             * np.exp(r12 / (2 * (1+ alpha* r12)))) ** 2
-    
+
     return psisq
 
 #%%
 alpha = .1
 
 
-bound = 5 
+bound = 5
 dims = 6
 # creates symmetric bounds specified by [-bound, bound] in dims dimensions
 symm_bounds= np.full((dims, 2), np.array([-bound, bound]))
@@ -227,10 +227,10 @@ def plot_iter_graphs(itegrand, bounds, iter_range, lit_val, plotval=1, plotnormv
     results = []
     variances = []
     times = []
-    
+
     def get_lit(x):
         return float(lit_val) + 0*x
-    
+
     for iters in iter_range:
         iters = int(iters)
         start_time = time.time()
@@ -239,7 +239,7 @@ def plot_iter_graphs(itegrand, bounds, iter_range, lit_val, plotval=1, plotnormv
         results.append(x[0])
         variances.append(x[1])
         times.append(duration)
-    
+
     if plotval:
         plt.plot(np.log10(iter_range), results)
         plt.xscale = 'log'
@@ -248,7 +248,7 @@ def plot_iter_graphs(itegrand, bounds, iter_range, lit_val, plotval=1, plotnormv
         plt.grid()
         plt.plot()
         plt.show()
-        
+
     if plotnormval:
         xrange = np.log10(iter_range)
         plt.plot(xrange, results/get_lit(np.log10(iter_range)))
@@ -258,7 +258,7 @@ def plot_iter_graphs(itegrand, bounds, iter_range, lit_val, plotval=1, plotnormv
         plt.grid()
         plt.plot()
         plt.show()
-    
+
     if plottime:
         plt.plot(np.log10(iter_range), times)
         plt.xscale = 'log'
@@ -274,4 +274,3 @@ def plot_iter_graphs(itegrand, bounds, iter_range, lit_val, plotval=1, plotnormv
 #lit_val = 0.8862925
 #
 #plot_iter_graphs(itegrand, bounds, iter_range, lit_val, 0,0,0)
-

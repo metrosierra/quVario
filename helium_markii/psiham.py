@@ -48,13 +48,8 @@ class HamLet():
         with PsiLet(**kwargs) as psi:
             self.bases = psi.bases
             self.alphas = psi.alphas
-            if trial_expr == 'onepara':
-                self.trial = parse_expr(psi.onepara())
-            elif trial_expr == 'twopara':
-                self.trial = parse_expr(psi.twopara())
-            elif trial_expr == 'threepara':
-                self.trial = parse_expr(psi.threepara())
-
+            func_selected = psi.getfunc(trial_expr)
+            self.trial = simplify(parse_expr(func_selected()))
 
             #for convenience
             self.r0 =  parse_expr(psi.r0)
@@ -77,14 +72,10 @@ class HamLet():
             for i, x in enumerate(parameters):
                 code_param.append(f'{x} = parameters[{i}]')
             code_param = '\n    '.join(code_param)
-#             if constants:
-#                 code_constants = []
-#                 for k, v in constants.items():
-#                     code_constants.append(f'{k} = {v}')
-#                 code_constants = '\n    '.join(code_constants)
 
         temp = lambdastr((), expression)
         temp = temp[len('lambda : '):]
+        temp = temp.replace('math.exp', 'np.exp')
         code_expression = f'{temp}'
 
         template = f"""
@@ -98,6 +89,28 @@ def {name}(coordinates, parameters):
         print('Function template generated! Its name is ', name)
         return template
 
+    def vegafy(self, expression, coordinates = None, name = 'vega_func'):
+
+        if coordinates:
+            code_coord = []
+            for i, x in enumerate(coordinates):
+                code_coord.append(f'{x} = coordinates[:,{i}]')
+            code_coord = '\n    '.join(code_coord)
+
+        temp = lambdastr((), expression)
+        temp = temp[len('lambda : '):]
+        temp = temp.replace('math.exp', 'np.exp')
+        code_expression = f'{temp}'
+
+        template = f"""
+@vegas.batchintegrand
+def {name}(coordinates):
+
+    {code_coord}
+
+    return {code_expression}"""
+        print('Function template generated! Its name is ', name)
+        return template
 
     def he_getfuncs(self):
         return self.he_elocal(), self.he_norm(), self.he_trial()
@@ -108,6 +121,10 @@ def {name}(coordinates, parameters):
 
     def he_norm(self):
         return (self.variables, self.trial*self.trial)
+
+    def he_expect(self):
+        operated = self.he_operate(self.trial)
+        return (self.variables, operated*self.trial)
 
     def he_trial(self):
         return (self.variables, self.trial)
@@ -183,10 +200,20 @@ class PsiLet():
         for i in range(number):
             self.alphas.append(sy.symbols('alpha' + str(i)))
 
-    def getfunc(self):
-        pass
+    def getfunc(self, function):
 
-    def onepara(self):
+        self.func_dict = {
+
+        'onepara1': self.onepara1,
+        'twopara1': self.twopara1,
+        'threepara1': self.threepara1,
+        'threepara2': self.threepara2
+
+        }
+        return self.func_dict[function]
+
+
+    def onepara1(self):
         self.r0 = '(x0**2 + y0**2 + z0**2)**0.5'
         self.r1 = '(x1**2 + y1**2 + z1**2)**0.5'
         self.r01 = '((x0-x1)**2 + (y0-y1)**2 + (z0-z1)**2)**0.5'
@@ -196,7 +223,7 @@ class PsiLet():
         return expr
 
 
-    def twopara(self):
+    def twopara1(self):
         self.r0 = '(x0**2 + y0**2 + z0**2)**0.5'
         self.r1 = '(x1**2 + y1**2 + z1**2)**0.5'
         self.r01 = '((x0-x1)**2 + (y0-y1)**2 + (z0-z1)**2)**0.5'
@@ -205,15 +232,23 @@ class PsiLet():
         # expr = f'exp(-alpha0*({self.r0} + {self.r1}))'
         return expr
 
-    def threepara(self):
+    def threepara1(self):
         self.r0 = '(x0**2 + y0**2 + z0**2)**0.5'
         self.r1 = '(x1**2 + y1**2 + z1**2)**0.5'
         self.r01 = '((x0-x1)**2 + (y0-y1)**2 + (z0-z1)**2)**0.5'
 
-        expr = f'''(exp(-alpha0*{self.r0}-alpha1*{self.r1})+exp(-alpha1*{self.r0}-alpha0*{self.r1}))*(1 + alpha2*{self.r01})'''
+        expr = f'''(exp(-alpha0*{self.r0}-alpha1*{self.r1})-exp(-alpha1*{self.r0}-alpha0*{self.r1}))*(1 + alpha2*{self.r01})'''
         # expr = f'exp(-alpha0*({self.r0} + {self.r1}))'
         return expr
 
+    def threepara2(self):
+        self.r0 = '(x0**2 + y0**2 + z0**2)**0.5'
+        self.r1 = '(x1**2 + y1**2 + z1**2)**0.5'
+        self.r01 = '((x0-x1)**2 + (y0-y1)**2 + (z0-z1)**2)**0.5'
+
+        expr = f'''1/2**0.5*(exp(-alpha0*{self.r0}-alpha1*{self.r1}) + exp(-alpha1*{self.r0}-alpha0*{self.r1}))*exp({self.r01}/(2*(1 + alpha2*{self.r01})))'''
+        # expr = f'exp(-alpha0*({self.r0} + {self.r1}))'
+        return expr
 
 
     ### this function is flawed, gives numerically incorrect result. Use with caution
@@ -235,18 +270,16 @@ class PsiLet():
 #%%%%%%%%%%%%%%%%%%
 
 # psilet_args = {'electrons': 2, 'alphas': 2, 'coordsys': 'cartesian'}
-# ham = HamLet(trial_expr = 'twopara', **psilet_args)
-#
+# ham = HamLet(trial_expr = 'twopara1', **psilet_args)
 #
 # variables, lolz = ham.he_elocal()
 #
 # q = ham.numbafy(lolz, ham.variables, ham.alphas)
+# print(q)
+# # print(q)
 # exec(q)
 # # p = ham.numbafy(ham.e_local, parameters = variables, name= 'trial2' )
 # # exec(p)
-# trial = np.array([1,1,1,2,1,2])
-# alpha = np.array([1, 2])
-# hi = trial_func(trial, alpha)
+# trial = np.array([1,0.5,1,2,1,2])
+# alpha = np.array([[1.8, 0.2], [1.8,0.2]])
 # # hi2 = trial2([1,1,1,2,1,2,2])
-#
-# print(hi)
