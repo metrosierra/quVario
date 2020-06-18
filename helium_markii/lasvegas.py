@@ -153,8 +153,8 @@ def evalenergy(alpha):
             E = expresult.mean/normresult.mean
         else: 
             E = expresult[0].mean/ normresult[0].mean
-        print('Energy is %f when alpha is %f' %(E, alpha))
-        print("--- Iteration time: %s seconds ---" % (time.time() - start_time))
+        #print('Energy is %f when alpha is %f' %(E, alpha))
+        #print("--- Iteration time: %s seconds ---" % (time.time() - start_time))
         return E
     E = main()
     return E
@@ -165,23 +165,27 @@ def evalenergy(alpha):
 start_time = time.time()
 OPTIM = False
 
+plt.figure(figsize=(16,10))
 #high resolution bit closer to the minimum
 #alpha0 = np.linspace(0.001, 0.1, 5)
 #energies0 = []
 #for i in alpha0:
 #    energies0.append(evalenergy(i))
   
+print('Plotting function initialised!')
 energies = []
-alpha = np.linspace(0.1, 0.2, 50)
+alpha = np.linspace(0.1, 0.2, 20)
 for i in alpha:
     energy_samples = []
-    for j in range(3):
+    for j in range(1):
         energy_samples.append(evalenergy(i))
     avg = np.average(energy_samples)
     print('Averaged energy for %f is %f' %(i, avg))
     energies.append(avg)
 plt.plot(alpha, energies, color='dodgerblue')
 print("--- Total time: %s seconds ---" % (time.time() - start_time))
+
+plt.savefig('Vegas')
 
 #%%
 ##low resolution bit
