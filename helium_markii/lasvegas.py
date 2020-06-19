@@ -20,8 +20,8 @@ import psiham
 
 
 
-psilet_args = {'electrons': 2, 'alphas': 3, 'coordsys': 'cartesian'}
-ham = psiham.HamLet(trial_expr = 'threepara2', **psilet_args)
+psilet_args = {'electrons': 2, 'alphas': 1, 'coordsys': 'cartesian'}
+ham = psiham.HamLet(trial_expr = 'onepara1', **psilet_args)
 variables, expr = ham.he_expect()
 temp1 = ham.vegafy(expr, coordinates = variables, name = 'expec')
 
@@ -37,11 +37,11 @@ OPTIM = True
 def main(alpha):
 
     global alpha0
-    global alpha1
-    global alpha2
+#    global alpha1
+#    global alpha2
     alpha0 = alpha[0]
-    alpha1 = alpha[1]
-    alpha2 = alpha[2]
+#    alpha1 = alpha[1]
+#    alpha2 = alpha[2]
 
     start_time = time.time()
 
@@ -59,16 +59,16 @@ def main(alpha):
     expinteg(expec, nitn=5, neval=1000)
     norminteg(norm,nitn=5, neval=1000)
     # do the final integrals
-    expresult = expinteg(expec, nitn=10, neval=100000)
-    normresult = norminteg(norm, nitn=10, neval=100000)
+    expresult = expinteg(expec, nitn=10, neval=1000000)
+    normresult = norminteg(norm, nitn=10, neval=1000000)
 
 
     if not OPTIM:
         E = expresult.mean/normresult.mean
     else:
         E = expresult[0].mean/ normresult[0].mean
-    print('Energy is {} when alpha is {}'.format(E, alpha), ' with sdev = ', [expresult.sdev, normresult.sdev])
-    print("--- Iteration time: %s seconds ---" % (time.time() - start_time))
+#    print('Energy is {} when alpha is {}'.format(E, alpha), ' with sdev = ', [expresult.sdev, normresult.sdev])
+#    print("--- Iteration time: %s seconds ---" % (time.time() - start_time))
 
     final_results['energy'] = E
     final_results['dev'] = [expresult.sdev, normresult.sdev]
@@ -76,15 +76,15 @@ def main(alpha):
 
     return E
 
-
+### Optimisation ALgorithm
 start_time = time.time()
 OPTIM = False
 
-plt.figure(figsize=(16,10))
+#plt.figure(figsize=(16,10))
 
-print('Plotting function initialised!')
-energies = []
-alpha = np.linspace(0.1, 0.2, 20)
+#print('Plotting function initialised!')
+#energies = []
+#alpha = np.linspace(0.1, 0.2, 20)
 # for i in alpha:
 #     alpha0 = i
 #
@@ -101,12 +101,62 @@ alpha = np.linspace(0.1, 0.2, 20)
 
 OPTIM = False
 start_time = time.time()
-# alpha0 = 0.2
-# print(main(1))
-result = fmin(main, [2, 2.001, 0.2], ftol = 0.01, xtol = 0.001, full_output=True)
+result = fmin(main, [0.15], ftol = 0.01, xtol = 0.001, full_output=True)
 #e = evalenergy(0.5)
 #print(e)
 print("--- Total time: %s seconds ---" % (time.time() - start_time))
+
+#%% To plot a histogram of evaluations
+### VEGAS PLOTS FOR ENERGIES AND HISTOGRAMS
+#N = 50
+#energies = []
+#optparas = []
+#start_time = time.time()
+#print('Loop initialised!')
+#
+#for i in range(N):
+#    loop_time = time.time()
+#    result = fmin(evalenergy, [0.15], ftol = 0.01, xtol = 0.001, full_output=True)
+#    energies.append(result[1])
+#    optparas.append(float(result[0]))
+#    print("--- Loop time: %s seconds ---" % (time.time() - loop_time))
+#    
+#print("--- Total time: %s seconds ---" % (time.time() - start_time))
+#
+#
+#name = 'vegas_1param_iters=1e6_N=50'
+#np.savetxt('%s.csv' %name, np.transpose([energies,optparas]), 
+#           fmt = '%s', delimiter=',', header = name)
+#
+#avg = np.mean(energies)
+#std = np.std(energies)
+#plt.figure(figsize=(16,10))
+#plt.rcParams.update({'font.size': 22})
+#
+#plt.hist(energies,10)
+#plt.xlabel('Energy (Atomic Units)')
+#plt.ylabel('N')
+#plt.figtext(0.2,0.75,'oneparam, N=%i, \n' 
+#            'n=1e6, bound=8 \n'
+#            'avg E= %.5f \n'
+#            'std = %.5f'%(N, avg,std))
+#plt.title('Histogram of distributed optimised energy values for VEGAS')
+#plt.savefig('vegas_energyhist_1param_1e6')
+#plt.show()
+#
+#alphaavg = np.mean(optparas)
+#alphastd = np.std(optparas)
+#plt.figure(figsize=(16,10))
+#plt.xlabel('Variational parameter alpha')
+#plt.ylabel('N')
+#plt.figtext(0.2,0.7,'oneparam, N=%i, \n n=1e6, bound=8 \n'
+#            'avg alpha = %.5f \n'
+#            'std = %.5f'%(N, alphaavg,alphastd))
+#plt.title('Histogram of distributed optimised parameters for VEGAS')
+#plt.hist(optparas,10)
+#plt.savefig('vegas_alphahist_1_param_1e6')
+#plt.show()
+
 
 #%%%%%%%%%%%%%%%%%%%%
 
@@ -240,8 +290,8 @@ def evalenergy(alpha):
             E = expresult.mean/normresult.mean
         else:
             E = expresult[0].mean/ normresult[0].mean
-        #print('Energy is %f when alpha is %f' %(E, alpha))
-        #print("--- Iteration time: %s seconds ---" % (time.time() - start_time))
+#        print('Energy is %f when alpha is %f' %(E, alpha))
+#        print("--- Iteration time: %s seconds ---" % (time.time() - start_time))
         return E
     E = main()
     return E
