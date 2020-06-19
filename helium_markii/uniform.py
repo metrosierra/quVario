@@ -11,9 +11,9 @@ import time
 import numpy as np
 from scipy.optimize import fmin
 import matplotlib.pyplot as plt
-from numba import njit
+from numba import njit, prange
 
-@njit
+@njit(parallel = True)
 def Uint(integrand, sampler, bounds, measure, n, alpha):
     ''' Obtains integral result
     Inputs:
@@ -26,7 +26,7 @@ def Uint(integrand, sampler, bounds, measure, n, alpha):
     # this takes n samples from the integrand and stores it in values
     values = np.zeros(n)
 
-    for i in range(n):
+    for i in prange(n):
         sample = sampler(bounds)
         val = integrand(sample, alpha)
         values[i] = val
@@ -123,7 +123,7 @@ def psisq(x, alpha):
 @njit
 def evalenergy(alpha):
     #initialise settings
-    domain = 5.
+    domain = 2.
     dims = 6
 
     bounds = []

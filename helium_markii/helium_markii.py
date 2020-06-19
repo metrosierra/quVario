@@ -10,7 +10,9 @@ import numpy as np
 from numba import njit
 import matplotlib.pyplot as plt
 
-from optipack import MiniMiss, integrator_mcmc, metropolis_hastings
+from optipack import MiniMiss
+from optipack import integrator_mcmc, metropolis_hastings
+from optipack import 
 import psiham
 
 class Noble():
@@ -44,12 +46,15 @@ class Noble():
         temp = self.ham.numbafy(self.ham.elocal, coordinates = self.ham.variables, parameters = self.ham.alphas, name = 'pp')
         exec(temp, globals())
 
-
     def mcmc_metro(self, args):
         temp = integrator_mcmc(pfunc, qfunc, self.mcmc_length, self.walkers, alpha = args, dims = 6)
         self.std = temp[1]
         self.reject_ratio = temp[2]
         return temp[0]
+
+    def monte_uniform(self, ):
+        temp =
+
 
     def minimise(self, function, guess):
         temp = self.mini.minimise(func = function, guess = guess, ftol = 0.01)

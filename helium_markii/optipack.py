@@ -113,12 +113,59 @@ def integrator_mcmc(pfunc, qfunc, sample_iter, walkers, alpha, dims):
 
 #%%%%%%%%%%%
 
+@njit(parallel = True)
+def Uint(integrand, samples, bounds, n, alpha):
 
 
+    # this takes n samples from the integrand and stores it in values
+    values = 0
+    for i in prange(n):
+        sample = np.random.uniform(bounds[0], bounds[1], len(bounds))
+        val = integrand(sample, alpha)
+        values += val
+
+    # this is the value of the sampled integrand values
+    result = values / n
+    return result
 
 
+@njit
+def evalenergy(integrand, alpha, n = 100000, iters = 30):
+    #initialise settings
+    domain = 2.
+    dims = 6
 
+    #origin centered symmetrical volume
+    bounds = []
+    for i in range(dims):
+        bounds.append([-domain, domain])
+    bounds = np.array(bounds)
 
+    measure = 1.
+    for i in range(dims):
+        dimlength = float(bounds[1] - bounds[0])
+        measure *= dimlength
+
+    results = np.zeros(iters)
+    normresults = np.zeros(iters)
+    for i in range(iters):
+
+        results[i] = Uint(integrand, bounds, n, alpha) * measure
+        normresults[i] = Uint(integrand, bounds, n, alpha) * measure
+
+    #obtain average and variance
+    vals = expresults/normresults
+    avg = np.sum(vals) / iters
+    vals_squared = np.sum(vals**2)
+    var = (vals_squared/ iters - avg **2)
+    std = np.sqrt(var)
+
+    E = avg
+    print(E, std)
+    # print('When alpha is {}, the energy is {} with std {}' .format(alpha, E, std))
+    return E, std
+
+#%%%%%%%%%%%%%%%%%%%%%%%
 
 
 class MiniMiss():
