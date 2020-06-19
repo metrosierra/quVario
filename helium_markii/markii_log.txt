@@ -672,3 +672,21 @@ Optimised parameter (atomic units) = [1.8676     1.96666667 0.21333333]
 Optimised function value (atomic units) = -2.8954 with std = 0.0022
 Walkers = 100, MCMC iterations = 10000 with rejection ratio = 0.7856
 Comments = (threepara2 used, with minus between two electron terms)
+
+##########
+Datetime = 20/06/2020 00:33:44
+Time taken (s) = 214.4606
+Initial parameter guess (atomic untis) = [2.001 2.    0.2  ]
+Optimised parameter (atomic units) = [0.45245445 1.99306627 0.24096224]
+Optimised function value (atomic units) = -2.1673 with std = 0.0008
+Walkers = 100, MCMC iterations = 10000 with rejection ratio = 0.5374
+Comments = (threepara2 used, with minus between two electron terms)
+
+##########
+Datetime = 20/06/2020 00:43:53
+Time taken (s) = 100.9862
+Initial parameter guess (atomic untis) = [2.001 0.2  ]
+Optimised parameter (atomic units) = [1.92117495 0.20721191]
+Optimised function value (atomic units) = -2.8929 with std = 0.0022
+Walkers = 100, MCMC iterations = 10000 with rejection ratio = 0.7913
+Comments = (threepara2 used, with minus between two electron terms)

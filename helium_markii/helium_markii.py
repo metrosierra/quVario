@@ -10,7 +10,7 @@ import numpy as np
 from numba import njit
 import matplotlib.pyplot as plt
 
-from optipack import MiniMiss, integrator_mcmc, metropolis_hastings, mcmc_q, mcmc_p
+from optipack import MiniMiss, integrator_mcmc, metropolis_hastings
 import psiham
 
 class Noble():
@@ -18,11 +18,10 @@ class Noble():
     def __init__(self, qfunc_name = 'qfunc'):
         print('Noble initialising')
         self.qfunc_name = qfunc_name
-        self.monty = MontyPython(dimensions = 6)
         self.mini = MiniMiss()
 
         psilet_args = {'electrons': 2, 'alphas': 3, 'coordsys': 'cartesian'}
-        self.ham = psiham.HamLet(trial_expr = 'threepara2', **psilet_args)
+        self.ham = psiham.HamLet(trial_expr = 'threepara1', **psilet_args)
         self.gen_he_elocal()
         self.gen_pdf()
 
@@ -30,11 +29,6 @@ class Noble():
         self.walkers = 100
         data = self.minimise(function = self.mcmc_metro, guess = np.array([2.001, 2., 0.2]))
         self.custom_log(data, comments = 'threepara2 used, with minus between two electron terms')
-
-#    def get_functions(self):
-
-    # def expr1(self):
-    #     return self.monty.integrator_mcmc(self.pfunc, self.he_elocal)
 
     def gen_he_elocal(self):
         variables, expr = self.ham.he_elocal()

@@ -15,18 +15,18 @@ from numba import njit
 
 @njit
 def Uint(integrand, sampler, bounds, measure, n, alpha):
-    ''' Obtains integral result 
+    ''' Obtains integral result
     Inputs:
         integrand: function
         sampler: uniform sampler, function
         bounds: integral bounds, array
         n: number of samples per dimension
     '''
-    
+
     # this takes n samples from the integrand and stores it in values
     values = np.zeros(n)
-    
-    for i in range(n): 
+
+    for i in range(n):
         sample = sampler(bounds)
         val = integrand(sample, alpha)
         values[i] = val
@@ -39,7 +39,7 @@ def Uint(integrand, sampler, bounds, measure, n, alpha):
 def Uint_iter(integrand, sampler, bounds, measure, n, iters, alpha):
         ''' returns array of integral results
         '''
-        # obtain iters integral results 
+        # obtain iters integral results
         results = np.zeros(iters)
         for i in range(iters):
             results[i] = Uint(integrand, sampler, bounds, measure, n, alpha)
@@ -67,7 +67,7 @@ def get_measure(bounds):
 @njit
 def sampler(bounds):
     ''' returns a uniformly distributed random array of size dims
-    
+
     inputs:
         bounds is a 2D array, specifying the integration range of each dim
     '''
@@ -84,7 +84,7 @@ def psiHpsi(x, alpha):
     '''
     r1 = x[0:3]
     r2 = x[3:]
-    
+
     r1_len = np.sqrt(x[0]**2 + x[1]**2 + x[2]**2)
     r2_len = np.sqrt(x[3]**2 + x[4]**2 + x[5]**2)
 
@@ -93,17 +93,17 @@ def psiHpsi(x, alpha):
     r2_hat = r2 / r2_len
 
     r12 = np.sqrt((x[0]-x[3])**2 + (x[1]-x[4])**2 + (x[2]-x[5])**2)
-    
+
     EL = ((-4 + np.dot(r1_hat - r2_hat, r1 - r2 ) / (r12 * (1+alpha[0]*r12)**2)
             - 1/ (r12*(1+alpha[0]*r12)**3)
             - 1/ (4*(1+alpha[0]*r12)**4)
             + 1/ r12 ))
-    
+
     psisq = ((np.exp(-2 * r1_len)* np.exp(-2 * r2_len)
             * np.exp(r12 / (2 * (1+ alpha[0]* r12)))) ** 2)
 
     return psisq* EL
-    
+
 @njit
 def psisq(x, alpha):
     ''' Squared trial wavefunction
@@ -120,33 +120,37 @@ def psisq(x, alpha):
 
 # I just can't jit this part for some odd reason? All functions that it calls are
     # jitted though
-#@njit 
+@njit
 def evalenergy(alpha):
     #initialise settings
-    bound = 5
+    domain = 5.
     dims = 6
-    bounds= np.array(dims*[[-bound,bound]])
-    n = int(1000000)
+
+    bounds = []
+    for i in range(dims):
+        bounds.append([-domain, domain])
+    bounds = np.array(bounds)
+    n = 100000
     iters = 30
     measure  = get_measure(bounds)
-    
+
     expresults = Uint_iter(psiHpsi, sampler, bounds, measure, n, iters, alpha)
     normresults = Uint_iter(psisq, sampler, bounds, measure, n, iters, alpha)
-    
+
     #obtain average and variance
     vals = expresults/normresults
     avg = np.sum(vals) / iters
     vals_squared = np.sum(vals**2)
-    var = (vals_squared/ iters - avg **2) 
+    var = (vals_squared/ iters - avg **2)
     std = np.sqrt(var)
 
     E = avg
-    
-    print('When alpha is %s, the energy is %.3f with std %.3f' %(alpha, E, std))
+    print(E, std)
+    # print('When alpha is {}, the energy is {} with std {}' .format(alpha, E, std))
     return E
 
 
-### Minimisation algorithm 
+### Minimisation algorithm
 
 start_time = time.time()
 fmin(evalenergy, 0.1, full_output = 1, ftol = 1)
