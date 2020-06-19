@@ -20,8 +20,8 @@ import psiham
 
 
 
-psilet_args = {'electrons': 2, 'alphas': 3, 'coordsys': 'cartesian'}
-ham = psiham.HamLet(trial_expr = 'threepara2', **psilet_args)
+psilet_args = {'electrons': 2, 'alphas': 1, 'coordsys': 'cartesian'}
+ham = psiham.HamLet(trial_expr = 'onepara1', **psilet_args)
 variables, expr = ham.he_expect()
 temp1 = ham.vegafy(expr, coordinates = variables, name = 'expec')
 
@@ -37,11 +37,11 @@ OPTIM = True
 def main(alpha):
 
     global alpha0
-    global alpha1
-    global alpha2
+#    global alpha1
+#    global alpha2
     alpha0 = alpha[0]
-    alpha1 = alpha[1]
-    alpha2 = alpha[2]
+#    alpha1 = alpha[1]
+#    alpha2 = alpha[2]
 
     start_time = time.time()
 
@@ -80,11 +80,11 @@ def main(alpha):
 start_time = time.time()
 OPTIM = False
 
-plt.figure(figsize=(16,10))
+#plt.figure(figsize=(16,10))
 
-print('Plotting function initialised!')
-energies = []
-alpha = np.linspace(0.1, 0.2, 20)
+#print('Plotting function initialised!')
+#energies = []
+#alpha = np.linspace(0.1, 0.2, 20)
 # for i in alpha:
 #     alpha0 = i
 #
@@ -99,11 +99,10 @@ alpha = np.linspace(0.1, 0.2, 20)
 
 # plt.savefig('Vegas')
 
+
 OPTIM = False
 start_time = time.time()
-# alpha0 = 0.2
-# print(main(1))
-result = fmin(main, [2, 2.001, 0.2], ftol = 0.01, xtol = 0.001, full_output=True)
+result = fmin(main, [0.15], ftol = 0.01, xtol = 0.001, full_output=True)
 #e = evalenergy(0.5)
 #print(e)
 print("--- Total time: %s seconds ---" % (time.time() - start_time))
