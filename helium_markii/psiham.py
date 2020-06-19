@@ -246,7 +246,7 @@ class PsiLet():
         self.r1 = '(x1**2 + y1**2 + z1**2)**0.5'
         self.r01 = '((x0-x1)**2 + (y0-y1)**2 + (z0-z1)**2)**0.5'
 
-        expr = f'''1/2**0.5*(exp(-alpha0*{self.r0}-alpha1*{self.r1}) + exp(-alpha1*{self.r0}-alpha0*{self.r1}))*exp({self.r01}/(2*(1 + alpha2*{self.r01})))'''
+        expr = f'''(exp(-alpha0*{self.r0}-alpha1*{self.r1}) - exp(-alpha1*{self.r0}-alpha0*{self.r1}))*exp({self.r01}/(2*(1 + alpha2*{self.r01})))'''
         # expr = f'exp(-alpha0*({self.r0} + {self.r1}))'
         return expr
 
