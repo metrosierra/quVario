@@ -3,170 +3,107 @@
 """
 Created on Wed Jun 17 16:24:56 2020
 
-@author: kenton
+Basic Uniform Monte Carlo Integrator
+Applied to Variational Calculations
 """
 
 import time
-
 import numpy as np
-import scipy as sp
-
 from scipy.optimize import fmin
-
 import matplotlib.pyplot as plt
-
-from numba import jit, njit
+from numba import njit
 
 @njit
-def Uint(integrand, sampler, bounds, n, *alpha):
-    ''' Obtains integral result and its variance
+def Uint(integrand, sampler, bounds, measure, n, alpha):
+    ''' Obtains integral result 
     Inputs:
         integrand: function
         sampler: uniform sampler, function
         bounds: integral bounds, array
         n: number of samples per dimension
-    Outputs:
     '''
+    
+    # this takes n samples from the integrand and stores it in values
+    values = np.zeros(n)
+    
+    for i in range(n): 
+        sample = sampler(bounds)
+        val = integrand(sample, alpha)
+        values[i] = val
 
-    samples = sampler(bounds, n)
-
-    measure = get_measure(bounds)
-
-    vals = integrand(samples, alpha)
-    vals_sq = np.sum(vals**2)
-
-    # this is the value and variance of the sampled integrand values
-    result = measure * np.sum(vals) / n
-    var = (vals_sq / n - ((result) ** 2))
-
-    return np.array([result, var])
+    # this is the value of the sampled integrand values
+    result = measure * np.sum(values) / n
+    return result
 
 @njit
-def iter_Uint(integrand, sampler, bounds, n, iters, *alpha):
+def Uint_iter(integrand, sampler, bounds, measure, n, iters, alpha):
+        ''' returns array of integral results
         '''
-        '''
-        result = np.zeros(iters)
-
-#        times = []
-
+        # obtain iters integral results 
+        results = np.zeros(iters)
         for i in range(iters):
-#            start_time = time.time()
-
-            x = Uint(integrand, sampler, bounds, n, alpha)
-
-
-#            duration = (time.time() - start_time)
-
-            result[i] = x[0]
-#            times.append(duration)
-
-        avg = np.sum(result) / iters
-#        print(avg)
-        result_squared = result ** 2
-
-        var = (np.sum(result_squared) - avg **2) / (iters - 1)
-#        print(var)
-#        return np.array([avg, var, times])
-        return np.array([avg, var, result])
-
-@njit
-def get_energy(alpha, psiHpsi, psisq, integrand, sampler, bounds, n, iters):
-
-    exp = iter_Uint(psiHpsi, sampler, bounds, n, iters, alpha)[0]
-    norm = iter_Uint(psisq, sampler, bounds, n, iters, alpha)[0]
-
-    return exp/ norm
+            results[i] = Uint(integrand, sampler, bounds, measure, n, alpha)
+        return results
 
 @njit
 def get_measure(bounds):
-    ''' obtains n dimensional 'measure' for the integral, which effectively
-        is the volume in n dimensional space of the integral bounds.
+    ''' obtains the volume of the dims dimensional hypercube.
         Used for multiplying the expected value.
 
         inputs:
-            bounds: list of size n, indicating the n bounds of the definite
+            bounds: array of size dims, indicating the dims bounds of the definite
                 integral
         outputs:
             measure: float
     '''
     measure = 1.
-
-#    for i in bounds:
-#        dimlength = float(i[1] - i[0])
-#        measure *= dimlength
-
-    for i in range(len(bounds)):
-        dimlength = float(bounds[i][1] - bounds[i][0])
+    dims = len(bounds)
+    for i in range(dims):
+        b = bounds[i]
+        dimlength = float(b[1] - b[0])
         measure *= dimlength
-
     return measure
 
 @njit
-def sampler(bounds, iters):
-    ''' generates a tuple of n input values from a random uniform distribution
-        e.g. for three dimensions, outputs tuple = (x,y,z) where x,y,z are
-        floats from a uniorm distribution
+def sampler(bounds):
+    ''' returns a uniformly distributed random array of size dims
+    
+    inputs:
+        bounds is a 2D array, specifying the integration range of each dim
     '''
     dims = len(bounds)
-    samples = np.zeros((dims, iters))
-
-#    for i,b in enumerate(bounds):
-#        dim_sample = np.random.uniform(b[0], b[1], iters)
-#        samples[i,:] = dim_sample
-
-    for i in range (len(bounds)):
-        dim_sample = np.random.uniform(bounds[i][0], bounds[i][1], iters)
-        samples[i,:] = dim_sample
+    samples = np.zeros(dims)
+    for i in range(dims):
+        b = bounds[i]
+        samples[i] = np.random.uniform(b[0], b[1])
     return samples
-
-@njit
-def integrand(x):
-    ''' this is the integrand function
-    '''
-    return  np.exp(-(x[0]) ** 2) * x[0]**2 
-
-### Helium atom variational method
 
 @njit
 def psiHpsi(x, alpha):
     ''' Local energy term
     '''
-#    r1 = np.array([x[0], x[1], x[2]])
-#    r2 = np.array([x[3], x[4], x[5]])
-
-    r1 = x[0:2]
-    r2 = x[3:5]
-
+    r1 = x[0:3]
+    r2 = x[3:]
+    
     r1_len = np.sqrt(x[0]**2 + x[1]**2 + x[2]**2)
     r2_len = np.sqrt(x[3]**2 + x[4]**2 + x[5]**2)
 
+
     r1_hat = r1 / r1_len
     r2_hat = r2 / r2_len
-#    print(x[0])
 
     r12 = np.sqrt((x[0]-x[3])**2 + (x[1]-x[4])**2 + (x[2]-x[5])**2)
+    
+    EL = ((-4 + np.dot(r1_hat - r2_hat, r1 - r2 ) / (r12 * (1+alpha[0]*r12)**2)
+            - 1/ (r12*(1+alpha[0]*r12)**3)
+            - 1/ (4*(1+alpha[0]*r12)**4)
+            + 1/ r12 ))
+    
+    psisq = ((np.exp(-2 * r1_len)* np.exp(-2 * r2_len)
+            * np.exp(r12 / (2 * (1+ alpha[0]* r12)))) ** 2)
 
-#    try:
-#        EL =  (-4 + np.dot(r1_hat - r2_hat, r1 - r2 ) / (r12 * (1 + alpha*r12)**2)
-#                - 1/ (r12*(1 + alpha*r12)**3)
-#                - 1/ (4*(1 + alpha*r12)**4)
-#                + 1/ r12 )
-#    except:
-#        EL =  (-4 + np.sum((r1_hat - r2_hat) * (r1 - r2), 0) / (r12 * (1 + alpha*r12)**2)
-#                - 1/ (r12*(1 + alpha*r12)**3)
-#                - 1/ (4*(1 + alpha*r12)**4)
-#                + 1/ r12 )
-
-    EL =  (-4 + np.dot(r1_hat - r2_hat, r1 - r2 ) / (r12 * (1 + alpha*r12)**2)
-            - 1/ (r12*(1 + alpha*r12)**3)
-            - 1/ (4*(1 + alpha*r12)**4)
-            + 1/ r12 )
-
-    psisq = (np.exp(-2 * r1_len)* np.exp(-2 * r2_len)
-            * np.exp(r12 / (2 * (1+ alpha*r12)))) ** 2
-
-    return psisq * EL
-
+    return psisq* EL
+    
 @njit
 def psisq(x, alpha):
     ''' Squared trial wavefunction
@@ -177,49 +114,48 @@ def psisq(x, alpha):
     r12 = np.sqrt((x[0]-x[3])**2 + (x[1]-x[4])**2 + (x[2]-x[5])**2)
 
     psisq = (np.exp(-2 * r1_len)* np.exp(-2 * r2_len)
-            * np.exp(r12 / (2 * (1+ alpha* r12)))) ** 2
+            * np.exp(r12 / (2 * (1+ alpha[0]* r12)))) ** 2
 
     return psisq
 
-#%%
-alpha = .1
+# I just can't jit this part for some odd reason? All functions that it calls are
+    # jitted though
+#@njit 
+def evalenergy(alpha):
+    #initialise settings
+    bound = 5
+    dims = 6
+    bounds= np.array(dims*[[-bound,bound]])
+    n = int(1000000)
+    iters = 30
+    measure  = get_measure(bounds)
+    
+    expresults = Uint_iter(psiHpsi, sampler, bounds, measure, n, iters, alpha)
+    normresults = Uint_iter(psisq, sampler, bounds, measure, n, iters, alpha)
+    
+    #obtain average and variance
+    vals = expresults/normresults
+    avg = np.sum(vals) / iters
+    vals_squared = np.sum(vals**2)
+    var = (vals_squared/ iters - avg **2) 
+    std = np.sqrt(var)
+
+    E = avg
+    
+    print('When alpha is %s, the energy is %.3f with std %.3f' %(alpha, E, std))
+    return E
 
 
-bound = 5
-dims = 6
-# creates symmetric bounds specified by [-bound, bound] in dims dimensions
-symm_bounds= np.full((dims, 2), np.array([-bound, bound]))
+### Minimisation algorithm 
 
-n = int(100000)
-iters = 10
-
-#fmin(get_energy, 0.2)
-energies = []
-for i in range(500):
-    e = get_energy(alpha, psiHpsi, psisq, integrand, sampler, symm_bounds, n, iters)
-    if i % 25 == 0:
-        print(i,e)
-    energies.append(e)
-plt.hist(energies,50)
-
-#%%
-#high resolution bit
-alpha = np.linspace(0.001, 0.3, 30)
-energies = []
-n = int(100000)
-iters = 10
-
-for i in alpha:
-    energies.append(get_energy(i, psiHpsi, psisq, integrand, sampler, symm_bounds, n, iters))
-plt.plot(alpha, energies, color='dodgerblue')
-
-args = (psiHpsi, psisq, integrand, sampler, symm_bounds, n, iters)
-
-#fmin(get_energy, 0.1,  (psiHpsi, psisq, integrand, sampler, symm_bounds, n, iters),full_output = 1, ftol = 0.1,)
-
+start_time = time.time()
+fmin(evalenergy, 0.1, full_output = 1, ftol = 1)
+duration = (time.time() - start_time)
+print('Time taken:', duration)
 
 #%%%%%%%%%%%%%%%%%%%%%%%%
 ### Graph Plotting stuff
+
 def plot_iter_graphs(itegrand, bounds, iter_range, lit_val, plotval=1, plotnormval=1, plottime=1):
     ''' This function is used for plotting graphs
     '''
@@ -267,10 +203,3 @@ def plot_iter_graphs(itegrand, bounds, iter_range, lit_val, plotval=1, plotnormv
         plt.grid()
         plt.show()
     pass
-
-#%%
-#bounds = np.array([[-4,4]])
-#iter_range = np.logspace(5,7,20)
-#lit_val = 0.8862925
-#
-#plot_iter_graphs(itegrand, bounds, iter_range, lit_val, 0,0,0)
