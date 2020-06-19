@@ -35,7 +35,6 @@ from sympy.utilities.lambdify import lambdastr
 
 '''
 MS's note: I will recycle my previous script for the two sets of electron coordinates and use sympy to symbolically generate the laplacian for each electron. I think we can safe assume our trial functions are analytical indefinitely so finding the laplacian is easy?
-
 everything will be kept to atomic units
 '''
 
@@ -81,10 +80,8 @@ class HamLet():
         template = f"""
 @njit
 def {name}(coordinates, parameters):
-
     {code_coord}
     {code_param}
-
     return {code_expression}"""
         print('Function template generated! Its name is ', name)
         return template
@@ -105,9 +102,7 @@ def {name}(coordinates, parameters):
         template = f"""
 @vegas.batchintegrand
 def {name}(coordinates):
-
     {code_coord}
-
     return {code_expression}"""
         print('Function template generated! Its name is ', name)
         return template
@@ -156,7 +151,7 @@ def {name}(coordinates):
         return lap
 
     def __enter__(self):
-        pass
+        return self
 
     def __exit__(self, e_type, e_val, traceback):
         print('HamLet object self-destructing...')
@@ -165,35 +160,31 @@ def {name}(coordinates):
 
 class PsiLet():
     def __init__(self, electrons = 2, alphas = 1, coordsys = 'cartesian'):
-        print('psiLet object initialised, reading input txt file (if any) for trial wavefunction')
+        print('psiLet object initialised.')
         self.spawn_electrons(electrons, coord_sys = coordsys)
         print('{} {} electron coordinate set(s) spawned'.format(electrons, coordsys))
         self.spawn_alphas(alphas)
         print('{} alpha parameter(s) spawned'.format(alphas))
 
-    def spawn_electrons(self, number, coord_sys = 'cart'):
+        self.r0 = '(x0**2 + y0**2 + z0**2)**0.5'
+        self.r1 = '(x1**2 + y1**2 + z1**2)**0.5'
+        self.r01 = '((x0-x1)**2 + (y0-y1)**2 + (z0-z1)**2)**0.5'
+        self.dot01 = 'x0*x1 + y0*y1 + z0*z1'
+
+
+    def spawn_electrons(self, number, coord_sys = 'cartesian'):
         self.bases = []
-        if coord_sys == 'spherical' or coord_sys == 's':
-            for i in range(number):
-                temp = []
-                for q in ['r', 'theta', 'phi']:
-                    temp.append(sy.symbols(q + str(i), real = True))
-                self.bases.append(temp)
+        self.basis_names = {
+        'cartesian': ['x', 'y', 'z'],
+        'spherical': ['r', 'theta', 'phi'],
+        'cylindrical': ['rho', 'phi', 'z']
+        }
 
-        elif coord_sys == 'cartesian' or coord_sys == 'cart':
-            for i in range(number):
-                temp = []
-                for q in ['x', 'y', 'z']:
-                    temp.append(sy.symbols(q + str(i)))
-                self.bases.append(temp)
-
-        elif coord_sys == 'cylindrical' or coord_sys == 'cylin':
-            for i in range(number):
-                temp = []
-                for q in ['rho', 'phi', 'z']:
-                    temp.append(sy.symbols(q + str(i)))
-                self.bases.append(temp)
-
+        for i in range(number):
+            temp = []
+            for q in self.basis_names[coord_sys]:
+                temp.append(sy.symbols(q + str(i)))
+            self.bases.append(temp)
 
     def spawn_alphas(self, number):
         self.alphas = []
@@ -201,7 +192,6 @@ class PsiLet():
             self.alphas.append(sy.symbols('alpha' + str(i)))
 
     def getfunc(self, function):
-
         self.func_dict = {
 
         'onepara1': self.onepara1,
@@ -214,49 +204,24 @@ class PsiLet():
 
 
     def onepara1(self):
-        self.r0 = '(x0**2 + y0**2 + z0**2)**0.5'
-        self.r1 = '(x1**2 + y1**2 + z1**2)**0.5'
-        self.r01 = '((x0-x1)**2 + (y0-y1)**2 + (z0-z1)**2)**0.5'
-
         expr = f'''exp(-2*{self.r0}-2*{self.r1}+{self.r01}/(2*(1+alpha0*{self.r01})))'''
-        # expr = f'exp(-alpha0*({self.r0} + {self.r1}))'
         return expr
 
-
     def twopara1(self):
-        self.r0 = '(x0**2 + y0**2 + z0**2)**0.5'
-        self.r1 = '(x1**2 + y1**2 + z1**2)**0.5'
-        self.r01 = '((x0-x1)**2 + (y0-y1)**2 + (z0-z1)**2)**0.5'
-
         expr = f'''exp(-alpha0*({self.r0}+{self.r1})+{self.r01}/(2*(1+alpha1*{self.r01})))'''
-        # expr = f'exp(-alpha0*({self.r0} + {self.r1}))'
         return expr
 
     def threepara1(self):
-        self.r0 = '(x0**2 + y0**2 + z0**2)**0.5'
-        self.r1 = '(x1**2 + y1**2 + z1**2)**0.5'
-        self.r01 = '((x0-x1)**2 + (y0-y1)**2 + (z0-z1)**2)**0.5'
-
-        expr = f'''(exp(-alpha0*{self.r0}-alpha1*{self.r1})-exp(-alpha1*{self.r0}-alpha0*{self.r1}))*(1 + alpha2*{self.r01})'''
-        # expr = f'exp(-alpha0*({self.r0} + {self.r1}))'
+        expr = f'''(exp(-alpha0*{self.r0}-alpha1*{self.r1})+exp(-alpha1*{self.r0}-alpha0*{self.r1}))*(1 + alpha2*{self.r01})'''
         return expr
 
     def threepara2(self):
-        self.r0 = '(x0**2 + y0**2 + z0**2)**0.5'
-        self.r1 = '(x1**2 + y1**2 + z1**2)**0.5'
-        self.r01 = '((x0-x1)**2 + (y0-y1)**2 + (z0-z1)**2)**0.5'
-
-        expr = f'''(exp(-alpha0*{self.r0}-alpha1*{self.r1}) - exp(-alpha1*{self.r0}-alpha0*{self.r1}))*exp({self.r01}/(2*(1 + alpha2*{self.r01})))'''
-        # expr = f'exp(-alpha0*({self.r0} + {self.r1}))'
+        expr = f'''1/2**0.5*(exp(-alpha0*{self.r0}-alpha1*{self.r1}) + exp(-alpha1*{self.r0}-alpha0*{self.r1}))*exp({self.r01}/(2*(1 + alpha2*{self.r01})))'''
         return expr
 
 
     ### this function is flawed, gives numerically incorrect result. Use with caution
     def manual2(self):
-        self.r0 = '(x0**2 + y0**2 + z0**2)**0.5'
-        self.r1 = '(x1**2 + y1**2 + z1**2)**0.5'
-        self.r01 = '((x0-x1)**2 + (y0-y1)**2 + (z0-z1)**2)**0.5'
-        self.dot01 = 'x0*x1 + y0*y1 + z0*z1'
 
         expr = f'''-4 + ({self.r0} + {self.r1})*(1 - {self.dot01}/({self.r0}*{self.r1}))/({self.r01}*(1+alpha0*{self.r01})**2) - 1/({self.r01}*(1+alpha0*{self.r01})**3) - 1/(4*(1+alpha0*{self.r01})**4) + 1/{self.r01}'''
         return expr
@@ -266,20 +231,3 @@ class PsiLet():
 
     def __exit__(self, e_type, e_val, traceback):
         print('psiLet object self-destructing')
-
-#%%%%%%%%%%%%%%%%%%
-
-# psilet_args = {'electrons': 2, 'alphas': 2, 'coordsys': 'cartesian'}
-# ham = HamLet(trial_expr = 'twopara1', **psilet_args)
-#
-# variables, lolz = ham.he_elocal()
-#
-# q = ham.numbafy(lolz, ham.variables, ham.alphas)
-# print(q)
-# # print(q)
-# exec(q)
-# # p = ham.numbafy(ham.e_local, parameters = variables, name= 'trial2' )
-# # exec(p)
-# trial = np.array([1,0.5,1,2,1,2])
-# alpha = np.array([[1.8, 0.2], [1.8,0.2]])
-# # hi2 = trial2([1,1,1,2,1,2,2])

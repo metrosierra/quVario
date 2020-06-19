@@ -21,13 +21,13 @@ class Noble():
         self.mini = MiniMiss()
 
         psilet_args = {'electrons': 2, 'alphas': 3, 'coordsys': 'cartesian'}
-        self.ham = psiham.HamLet(trial_expr = 'threepara1', **psilet_args)
+        self.ham = psiham.HamLet(trial_expr = 'threepara2', **psilet_args)
         self.gen_he_elocal()
         self.gen_pdf()
 
         self.mcmc_length = 10000
         self.walkers = 100
-        data = self.minimise(function = self.mcmc_metro, guess = np.array([2.001, 2., 0.2]))
+        data = self.minimise(function = self.mcmc_metro, guess = np.array([2.001, 2.0, 0.2]))
         self.custom_log(data, comments = 'threepara2 used, with minus between two electron terms')
 
     def gen_he_elocal(self):

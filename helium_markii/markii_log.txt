@@ -620,51 +620,6 @@ Number of iterations = 115.0000, with rejection ratio = 0.7714
 Comments = (None)
 
 ##########
-Datetime = 18/06/2020 17:58:57
-Time taken (s) = 169.3471
-Initial parameter guess (atomic untis) = [2.  2.  0.2]
-Optimised parameter (atomic units) = [1.60168884 2.14311369 0.21818601]
-Optimised function value (atomic units) = -2.8991 with std = 0.0018
-Number of iterations = 88.0000, with rejection ratio = 0.7617
-Comments = (threepara2 used)
-
-##########
-Datetime = 18/06/2020 21:44:18
-Time taken (s) = 135.2628
-Initial parameter guess (atomic untis) = [2.  2.  0.2]
-Optimised parameter (atomic units) = [1.55459344 2.17657652 0.20276907]
-Optimised function value (atomic units) = -2.8986 with std = 0.0015
-Number of iterations = 83.0000, with rejection ratio = 0.7685
-Comments = (threepara2 used, with plus between two electron terms)
-
-##########
-Datetime = 18/06/2020 21:48:16
-Time taken (s) = 160.4380
-Initial parameter guess (atomic untis) = [2.    2.001 0.2  ]
-Optimised parameter (atomic units) = [1.75906395 1.92565853 0.21629557]
-Optimised function value (atomic units) = -2.8977 with std = 0.0049
-Number of iterations = 99.0000, with rejection ratio = 0.7517
-Comments = (threepara2 used, with minus between two electron terms)
-
-##########
-Datetime = 18/06/2020 21:54:31
-Time taken (s) = 154.6415
-Initial parameter guess (atomic untis) = [2.    2.001 0.2  ]
-Optimised parameter (atomic units) = [2.00515865 1.67339101 0.21441854]
-Optimised function value (atomic units) = -2.8959 with std = 0.0040
-Number of iterations = 89.0000, with rejection ratio = 0.7756
-Comments = (threepara2 used, with plus between two electron terms and 1/sqrt(2) factor)
-
-##########
-Datetime = 18/06/2020 22:02:28
-Time taken (s) = 196.4588
-Initial parameter guess (atomic untis) = [2.    2.001 0.2  ]
-Optimised parameter (atomic units) = [2.02712178 0.42887078 0.26089083]
-Optimised function value (atomic units) = -2.1689 with std = 0.0017
-Number of iterations = 119.0000, with rejection ratio = 0.5258
-Comments = (threepara2 used, with minus between two electron terms and 1/sqrt(2) factor)
-
-##########
 Datetime = 18/06/2020 22:20:27
 Time taken (s) = 136.2006
 Initial parameter guess (atomic untis) = [2.001 2.    0.2  ]
@@ -674,19 +629,37 @@ Walkers = 100, MCMC iterations = 10000 with rejection ratio = 0.7856
 Comments = (threepara2 used, with minus between two electron terms)
 
 ##########
-Datetime = 20/06/2020 00:33:44
-Time taken (s) = 214.4606
-Initial parameter guess (atomic untis) = [2.001 2.    0.2  ]
-Optimised parameter (atomic units) = [0.45245445 1.99306627 0.24096224]
-Optimised function value (atomic units) = -2.1673 with std = 0.0008
-Walkers = 100, MCMC iterations = 10000 with rejection ratio = 0.5374
-Comments = (threepara2 used, with minus between two electron terms)
-
-##########
 Datetime = 20/06/2020 00:43:53
 Time taken (s) = 100.9862
 Initial parameter guess (atomic untis) = [2.001 0.2  ]
 Optimised parameter (atomic units) = [1.92117495 0.20721191]
 Optimised function value (atomic units) = -2.8929 with std = 0.0022
 Walkers = 100, MCMC iterations = 10000 with rejection ratio = 0.7913
+Comments = (threepara2 used, with minus between two electron terms)
+
+##########
+Datetime = 20/06/2020 01:18:43
+Time taken (s) = 577.6052
+Initial parameter guess (atomic untis) = [2.001 0.2  ]
+Optimised parameter (atomic units) = [1.84154531 0.205625  ]
+Optimised function value (atomic units) = -2.9064 with std = 0.0044
+Walkers = 100, MCMC iterations = 10000 with rejection ratio = 0.7568
+Comments = (threepara2 used, with minus between two electron terms)
+
+##########
+Datetime = 20/06/2020 01:37:59
+Time taken (s) = 135.3881
+Initial parameter guess (atomic untis) = [2.001 2.    0.2  ]
+Optimised parameter (atomic units) = [1.74902222 2.02037037 0.2162963 ]
+Optimised function value (atomic units) = -2.8992 with std = 0.0026
+Walkers = 100, MCMC iterations = 10000 with rejection ratio = 0.7772
+Comments = (threepara2 used, with minus between two electron terms)
+
+##########
+Datetime = 20/06/2020 01:41:18
+Time taken (s) = 156.4475
+Initial parameter guess (atomic untis) = [2.001 2.    0.2  ]
+Optimised parameter (atomic units) = [2.14634012 1.54032922 0.206893  ]
+Optimised function value (atomic units) = -2.8991 with std = 0.0019
+Walkers = 100, MCMC iterations = 10000 with rejection ratio = 0.7725
 Comments = (threepara2 used, with minus between two electron terms)
