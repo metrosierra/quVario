@@ -15,12 +15,11 @@ from numba import jit, njit
 from scipy.optimize import fmin
 import matplotlib.pyplot as plt
 
-from optipack import MiniMiss, integrator_mcmc, metropolis_hastings, mcmc_q, mcmc_p
+#from optipack import MiniMiss, integrator_mcmc, metropolis_hastings, mcmc_q, mcmc_p
 import psiham
 
-
 psilet_args = {'electrons': 2, 'alphas': 1, 'coordsys': 'cartesian'}
-ham = psiham.HamLet(trial_expr = 'onepara1', **psilet_args)
+ham = psiham.HamLet(trial_expr = 'twopara1', **psilet_args)
 variables, expr = ham.he_expect()
 temp1 = ham.vegafy(expr, coordinates = variables, name = 'expec')
 
@@ -58,8 +57,8 @@ def main(alpha):
     expinteg(expec, nitn=5, neval=1000)
     norminteg(norm,nitn=5, neval=1000)
     # do the final integrals
-    expresult = expinteg(expec, nitn=10, neval=10000)
-    normresult = norminteg(norm, nitn=10, neval=10000)
+    expresult = expinteg(expec, nitn=10, neval=100000)
+    normresult = norminteg(norm, nitn=10, neval=100000)
 
 
     if not OPTIM:
@@ -523,3 +522,78 @@ print("--- Total time: %s seconds ---" % (time.time() - start_time))
 #name = 'vegas_bound_processed_2'
 #np.savetxt('%s.csv' %name, B_processed_2, 
 #           fmt = '%s', delimiter=',', header = (name +'bound_energy_alpha_estd_astd'))
+
+#%%
+
+iters = [5e4, 1e5, 5e5, 1e6]
+#twopara_energy = np.zeros((10, 4))
+twopara_energy_backup = backup.copy()
+#%%
+N = 10
+
+indx = 3
+
+start_time = time.time()
+twop_energy = []
+twop_opt =[]
+
+def main(alpha):
+    print(alpha)
+    global alpha0
+    global alpha1
+#    global alpha2
+    alpha0 = alpha[0]
+    alpha1 = alpha[1]
+#    alpha2 = alpha[2]
+
+    start_time = time.time()
+
+    # assign integration volume to integrator
+    bound = 8
+    dims = 6
+    # creates symmetric bounds specified by [-bound, bound] in dims dimensions
+    symm_bounds = dims * [[-bound,bound]]
+
+    # simultaneously initialises expectation and normalisation integrals
+    expinteg = vegas.Integrator(symm_bounds)
+    norminteg = vegas.Integrator(symm_bounds)
+
+    # adapt to the integrands; discard results
+    expinteg(expec, nitn=5, neval=1000)
+    norminteg(norm,nitn=5, neval=1000)
+    # do the final integrals
+    expresult = expinteg(expec, nitn=10, neval=iters[indx])
+    normresult = norminteg(norm, nitn=10, neval=iters[indx])
+
+    if not OPTIM:
+        E = expresult.mean/normresult.mean
+    else:
+        E = expresult[0].mean/ normresult[0].mean
+#    print('Energy is {} when alpha is {}'.format(E, alpha), ' with sdev = ', [expresult.sdev, normresult.sdev])
+
+
+    final_results['energy'] = E
+    final_results['dev'] = [expresult.sdev, normresult.sdev]
+    final_results['pvalue'] = [expresult.Q, normresult.Q]
+#        print(E)
+    print("--- Iteration time: %s seconds ---" % (time.time() - start_time))
+    return E
+    
+for i in range(N):
+    print(indx, i)
+#    start_time = time.time()
+    result = fmin(main, [2, 0.15], ftol = 0.1, xtol = 0.01, full_output=1, disp=1)
+    twop_energy.append(result[1])
+    
+dur = time.time() - start_time
+print("--- Iteration time: %s seconds ---" % (dur))
+twopara_energy[:,indx] = twop_energy
+
+#%%
+##########
+### Save data into a csv
+#n = '1e5'
+name = 'vegas_2param_iters'
+np.savetxt('%s.csv' %name, (twopara_energy_backup), 
+           fmt = '%s', delimiter=',', header = (name))
+
