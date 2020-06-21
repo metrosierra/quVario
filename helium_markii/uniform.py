@@ -152,10 +152,10 @@ def evalenergy(alpha):
 
 ### Minimisation algorithm
 
-start_time = time.time()
-fmin(evalenergy, 0.1, full_output = 1, ftol = 1)
-duration = (time.time() - start_time)
-print('Time taken:', duration)
+# start_time = time.time()
+# fmin(evalenergy, 0.1, full_output = 1, ftol = 1)
+# duration = (time.time() - start_time)
+# print('Time taken:', duration)
 
 #%%%%%%%%%%%%%%%%%%%%%%%%
 ### Graph Plotting stuff

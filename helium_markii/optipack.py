@@ -18,28 +18,30 @@ import sys
 import os
 import time
 from datetime import datetime
-
+import statistics
 
 ### using sympy methods for symbolic integration. Potentially more precise and convenient (let's not numerically estimate yet)
 import numpy as np
 import scipy as sp
 import scipy.constants as sc
+from scipy import optimize, integrate
+
 import sympy as sy
 from sympy import conjugate, simplify, lambdify, sqrt
 from sympy import *
 from IPython.display import display
-from scipy import optimize, integrate
+
+import vegas
+
 
 import matplotlib.pyplot as plt
 
-#### For future monte carlo integration work hopefully
 import random
 from numba import jit, njit, prange
 
 
 @njit
 def metropolis_hastings(pfunc, iter, alpha, dims):
-
     # we make steps based on EACH electron, the number of which we calculate from dims/3
     # 'scale' of the problem. this is arbitrary
     s = 3.
@@ -85,7 +87,7 @@ def metropolis_hastings(pfunc, iter, alpha, dims):
 
 
 @njit
-def integrator_mcmc(pfunc, qfunc, sample_iter, walkers, alpha, dims):
+def integrator_mcmc(pfunc, qfunc, sample_iter, walkers, alpha, dims, verbose):
 
     therm = 0
     vals = np.zeros(walkers)
@@ -106,20 +108,22 @@ def integrator_mcmc(pfunc, qfunc, sample_iter, walkers, alpha, dims):
     variance = vals_squared/walkers - (vals_avg) ** 2
     std_error = np.sqrt(variance/walkers)
 
-
-    print('Iteration cycle complete, result = ', vals_avg, 'error = ', std_error, 'rejects = ', rejects, 'alpha current = ', alpha)
+    if verbose:
+        print('Iteration cycle complete, result = ', vals_avg, 'error = ', std_error, 'rejects = ', rejects, 'alpha current = ', alpha)
     return vals_avg, std_error, rejects, test, p
 
 
-#%%%%%%%%%%%
+#%%%%%%%%%%%%%%%%%%%%%%%
 
 @njit(parallel = True)
-def Uint(integrand, samples, bounds, n, alpha):
+def Uint(integrand, bounds, n, alpha):
 
     # this takes n samples from the integrand and stores it in values
     values = 0
-    for i in prange(n):
-        sample = np.random.uniform(bounds[0], bounds[1], len(bounds))
+    for x in prange(n):
+        sample = np.zeros(len(bounds))
+        for i in range(len(bounds)):
+            sample[i] = np.random.uniform(bounds[i][0], bounds[i][1])
         val = integrand(sample, alpha)
         values += val
 
@@ -129,11 +133,10 @@ def Uint(integrand, samples, bounds, n, alpha):
 
 
 @njit
-def evalenergy(integrand, alpha, n = 100000, iters = 30):
+def Ueval(normalisation, expectation, n, iters, alpha, dimensions):
     #initialise settings
     domain = 2.
-    dims = 6
-
+    dims = dimensions
     #origin centered symmetrical volume
     bounds = []
     for i in range(dims):
@@ -142,47 +145,153 @@ def evalenergy(integrand, alpha, n = 100000, iters = 30):
 
     measure = 1.
     for i in range(dims):
-        dimlength = float(bounds[1] - bounds[0])
+        dimlength = float(bounds[i][1] - bounds[i][0])
         measure *= dimlength
 
     results = np.zeros(iters)
     normresults = np.zeros(iters)
     for i in range(iters):
-
-        results[i] = Uint(integrand, bounds, n, alpha) * measure
-        normresults[i] = Uint(integrand, bounds, n, alpha) * measure
+        results[i] = Uint(expectation, bounds, n, alpha) * measure
+        normresults[i] = Uint(normalisation, bounds, n, alpha) * measure
 
     #obtain average and variance
-    vals = expresults/normresults
+    vals = results / normresults
     avg = np.sum(vals) / iters
     vals_squared = np.sum(vals**2)
     var = (vals_squared/ iters - avg **2)
     std = np.sqrt(var)
 
     E = avg
-    print(E, std)
+    print(E, std )
     # print('When alpha is {}, the energy is {} with std {}' .format(alpha, E, std))
     return E, std
 
 #%%%%%%%%%%%%%%%%%%%%%%%
 
+class LasVegas():
+
+    def __init__(self):
+        print('LasVegas up for business!')
+
+    def vegas_int(self, expec, norm, evals, iter, dimensions, volumespan):
+
+        self.final_results = {}
+
+        start_time = time.time()
+
+        # assign integration volume to integrator
+        bound = volumespan
+        dims = dimensions
+        # creates symmetric bounds specified by [-bound, bound] in dims dimensions
+        symm_bounds = dims * [[-bound,bound]]
+
+        # simultaneously initialises expectation and normalisation integrals
+        expinteg = vegas.Integrator(symm_bounds)
+        norminteg = vegas.Integrator(symm_bounds)
+
+        # adapt to the integrands; discard results
+        expinteg(expec, nitn = 5, neval = 1000)
+        norminteg(norm, nitn = 5, neval = 1000)
+        # do the final integrals
+        expresult = expinteg(expec, nitn = iter, neval = evals)
+        normresult = norminteg(norm, nitn = iter, neval = evals)
+
+
+        E = expresult.mean/normresult.mean
+        print('Energy is {} when alpha is'.format(E), ' with sdev = ', [expresult.sdev, normresult.sdev])
+        print("--- Iteration time: %s seconds ---" % (time.time() - start_time))
+
+        self.final_results['energy'] = E
+        self.final_results['dev'] = [expresult.sdev, normresult.sdev]
+        self.final_results['pvalue'] = [expresult.Q, normresult.Q]
+
+        return self.final_results
+
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, e_type, e_val, traceback):
+        print('\n\nLasVegas object self-destructing\n\n')
+
+
+#%%%%%%%%%%%%%%%%%%%%%%%
 
 class MiniMiss():
 
     def __init__(self):
         print('MiniMiss optimisation machine initialised and ready!\n')
 
-    def minimise(self, func, guess, ftol):
+    def neldermead(self, func, guess, ftol, bounds = [(0., 3.),(0., 3.),(0., 0.3) ]):
         starttime = time.time()
 
         temp = optimize.fmin(func, guess, full_output = 1, ftol = ftol)
+        # temp = optimize.differential_evolution(func, bounds)
+        # temp = optimize.minimize(func, guess, method = 'BFGS', tol = 0.01)
 
         endtime = time.time()
         elapsedtime = endtime - starttime
         now = datetime.now()
         date_time = now.strftime('%d/%m/%Y %H:%M:%S')
         # just returns datetime of attempt, elapsed time, optimised parameter, optimised value, number of iterations
-        return [date_time, elapsedtime, guess, temp[0], temp[1], temp[3]]
+        return [date_time, elapsedtime, guess, temp]
+
+    def gradient(self, func, guess, tolerance, convergence = 'fuzzy', args = None):
+
+        print('\nGradient descent initiated, type of convergence selected as ' + convergence +'\n')
+        cycle_count = 0
+        position0 = guess
+        ep = 0.00000001
+        step = 0.2
+        step_ratio = 0.5
+        epsilons = np.identity(len(guess))*ep
+        delta1 = 10.
+
+        point_collection = []
+
+        satisfied = False
+
+        while satisfied == False:
+            cycle_count+=1
+            print('Cycle', cycle_count)
+            value1 = func(position0)
+
+            vector = np.zeros(len(guess))
+            for i in range(len(guess)):
+                vector[i] = (func(position0 + epsilons[i]) - func(position0))/ep
+
+            vectornorm = vector/(np.linalg.norm(vector))
+            print(vectornorm)
+            position0 += -vectornorm * step
+            value2 = func(position0)
+            delta1 = value2 - value1
+
+            positionprime = position0 + vectornorm*(step*step_ratio)
+            value3 = func(positionprime)
+            delta2 = value3 - value1
+            if delta2 < delta1:
+                print('shrink!')
+                position0 = positionprime
+                step = step*step_ratio
+                delta1 = delta2
+                value2 = value3
+
+            point_collection.append(value2)
+            if convergence == 'strict':
+                satisfied = abs(delta1) < tolerance
+                finalvalue = value2
+
+            elif convergence == 'fuzzy':
+                if len(point_collection) >= 5:
+                    data_set = point_collection[-5:]
+                    print('std', statistics.pstdev(data_set))
+                    print('mean', statistics.mean(data_set))
+                    satisfied = abs(statistics.pstdev(data_set)/statistics.mean(data_set)) < tolerance
+                    finalvalue = statistics.mean(data_set)
+
+        print('Convergence sucess!')
+        return finalvalue, position0
+
 
     def __enter__(self):
         return self
