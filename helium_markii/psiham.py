@@ -83,7 +83,7 @@ def {name}(coordinates, parameters):
     {code_coord}
     {code_param}
     return {code_expression}"""
-        print('Function template generated! Its name is ', name)
+        print('Numba function template generated! Its name is ', name)
         return template
 
     def vegafy(self, expression, coordinates = None, name = 'vega_func'):
@@ -104,7 +104,7 @@ def {name}(coordinates, parameters):
 def {name}(coordinates):
     {code_coord}
     return {code_expression}"""
-        print('Function template generated! Its name is ', name)
+        print('Vega function template generated! Its name is ', name)
         return template
 
     def he_getfuncs(self):
@@ -212,11 +212,11 @@ class PsiLet():
         return expr
 
     def threepara1(self):
-        expr = f'''(exp(-alpha0*{self.r0}-alpha1*{self.r1})+exp(-alpha1*{self.r0}-alpha0*{self.r1}))*(1 + alpha2*{self.r01})'''
+        expr = f'''(exp(-alpha0*{self.r0}-alpha1*{self.r1}) + exp(-alpha1*{self.r0}-alpha0*{self.r1}))*(1 + alpha2*{self.r01})'''
         return expr
 
     def threepara2(self):
-        expr = f'''1/2**0.5*(exp(-alpha0*{self.r0}-alpha1*{self.r1}) + exp(-alpha1*{self.r0}-alpha0*{self.r1}))*exp({self.r01}/(2*(1 + alpha2*{self.r01})))'''
+        expr = f'''(exp(-alpha0*{self.r0}-alpha1*{self.r1}) + exp(-alpha1*{self.r0}-alpha0*{self.r1}))*exp({self.r01}/(2*(1 + alpha2*{self.r01})))'''
         return expr
 
 

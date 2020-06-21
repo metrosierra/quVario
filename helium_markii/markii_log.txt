@@ -663,3 +663,39 @@ Optimised parameter (atomic units) = [2.14634012 1.54032922 0.206893  ]
 Optimised function value (atomic units) = -2.8991 with std = 0.0019
 Walkers = 100, MCMC iterations = 10000 with rejection ratio = 0.7725
 Comments = (threepara2 used, with minus between two electron terms)
+
+##########
+Datetime = 20/06/2020 18:24:36
+Time taken (s) = 25.6143
+Initial parameter guess (atomic untis) = [0.2]
+Optimised parameter (atomic units) = [0.205]
+Optimised function value (atomic units) = -0.3650 with std = 25.6143
+Walkers = 100, MCMC iterations = 10000 with rejection ratio = 0.0000
+Comments = (Uniform integrator, 1 para)
+
+##########
+Datetime = 20/06/2020 18:48:47
+Time taken (s) = 615.6844
+Initial parameter guess (atomic untis) = [0.2]
+Optimised parameter (atomic units) = [0.21000061]
+Optimised function value (atomic units) = -2.8829 with std = 615.6844
+Iterations = 50, Evaluations/iter = 1000000 with rejection ratio = 0.0000
+Comments = (Uniform integrator, 1 para, std has some problem)
+
+##########
+Datetime = 20/06/2020 19:10:09
+Time taken (s) = 650.3366
+Initial parameter guess (atomic untis) = [2.  0.2]
+Optimised parameter (atomic units) = [1.90011139 0.2099971 ]
+Optimised function value (atomic units) = -2.8959 with std = 0.0568
+Iterations = 50, Evaluations/iter = 1000000 with rejection ratio = 0.0000
+Comments = (Uniform integrator, 2 para)
+
+##########
+Datetime = 20/06/2020 20:25:19
+Time taken (s) = 1496.4731
+Initial parameter guess (atomic untis) = [2.001 2.    0.2  ]
+Optimised parameter (atomic units) = [1.3955534  2.03782579 0.24943073]
+Optimised function value (atomic units) = -2.9089 with std = 0.0414
+Iterations = 50, Evaluations/iter = 1000000 with rejection ratio = 0.0000
+Comments = (Uniform integrator, 2 para)
