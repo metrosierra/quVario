@@ -299,20 +299,3 @@ class MiniMiss():
     def __exit__(self, e_type, e_val, traceback):
         print('\n\nMiniMiss object self-destructing\n\n')
         
-#%%
-#setup = 'import numpy as np'
-#code = 'np.random.uniform((-5,5), 6)'
-#print(timeit.timeit(setup = setup,stmt = code, number = N)/N)
-#N= 100000
-#
-#setup = 'import random; import numpy as np; x = np.zeros(6)'
-#code = 'for i in range(6): x[i] = random.uniform(-5,5)'
-#print(timeit.timeit(setup = setup,stmt = code, number = N)/N)
-#
-#setup = 'import random; x = []'
-#code = 'for i in range(6): x.append(random.uniform(-5,5))'
-#print(timeit.timeit(setup = setup,stmt = code, number = N)/N)
-#
-#setup = 'import random; '
-#code = 'x = [random.uniform(-5,5),random.uniform(-5,5),random.uniform(-5,5),random.uniform(-5,5),random.uniform(-5,5),random.uniform(-5,5)]'
-#print(timeit.timeit(setup = setup,stmt = code, number = N)/N)
