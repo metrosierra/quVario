@@ -106,46 +106,7 @@ print("--- Total time: %s seconds ---" % (time.time() - start_time))
 
 #%%%%%%%%%%%%%%%%%%%%
 #########################################################################
-#@njit
-#def f(x, alpha):
-#    ''' Expectation value function, used as numerator for variational integral
-#    '''
-#    r1 = np.array([x[0], x[1], x[2]])
-#    r2 = np.array([x[3], x[4], x[5]])
-#
-#    r1_len = np.sqrt(x[0]**2 + x[1]**2 + x[2]**2)
-#    r2_len = np.sqrt(x[3]**2 + x[4]**2 + x[5]**2)
-#
-#    r1_hat = r1 / r1_len
-#    r2_hat = r2 / r2_len
-#
-#    r12 = np.sqrt((x[0]-x[3])**2 + (x[1]-x[4])**2 + (x[2]-x[5])**2)
-#
-#    EL =  (-4 + np.dot(r1_hat - r2_hat, r1 - r2 ) / (r12 * (1 + alpha*r12)**2)
-#            - 1/ (r12*(1 + alpha*r12)**3)
-#            - 1/ (4*(1 + alpha*r12)**4)
-#            + 1/ r12 )
-#
-#    psisq = (np.exp(-2 * r1_len)* np.exp(-2 * r2_len)
-#            * np.exp(r12 / (2 * (1+ alpha*r12)))) ** 2
-#
-#    return psisq * EL
-#
-#@njit
-#def psisq(x, alpha):
-#    ''' Squared trial wavefunction, used as denominator for variational integral
-#    '''
-#    r1_len = np.sqrt(x[0]**2 + x[1]**2 + x[2]**2)
-#    r2_len = np.sqrt(x[3]**2 + x[4]**2 + x[5]**2)
-#
-#    r12 = np.sqrt((x[0]-x[3])**2 + (x[1]-x[4])**2 + (x[2]-x[5])**2)
-#
-#    psisq = (np.exp(-2 * r1_len)* np.exp(-2 * r2_len)
-#            * np.exp(r12 / (2 * (1+ alpha* r12)))) ** 2
-#
-#    return psisq
 
-#
 #def evalenergy(alpha):
 #    @vegas.batchintegrand
 #    def expec(x):
@@ -523,77 +484,88 @@ print("--- Total time: %s seconds ---" % (time.time() - start_time))
 #np.savetxt('%s.csv' %name, B_processed_2, 
 #           fmt = '%s', delimiter=',', header = (name +'bound_energy_alpha_estd_astd'))
 
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# This is for testing with regards to the twopara and 
+# threepara case. Since the loop is slow, 
+
+#twopara_energy_new = np.zeros((10,1))
+#twopara_energy_backup_2 = twopara_energy.copy()
 #%%
+energy = []
 
-iters = [5e4, 1e5, 5e5, 1e6]
-#twopara_energy = np.zeros((10, 4))
-twopara_energy_backup = backup.copy()
-#%%
-N = 10
-
-indx = 3
-
-start_time = time.time()
-twop_energy = []
-twop_opt =[]
-
-def main(alpha):
-    print(alpha)
-    global alpha0
-    global alpha1
-#    global alpha2
-    alpha0 = alpha[0]
-    alpha1 = alpha[1]
-#    alpha2 = alpha[2]
-
+def iterplot(data_arr, N, iters, indx):
     start_time = time.time()
-
-    # assign integration volume to integrator
-    bound = 8
-    dims = 6
-    # creates symmetric bounds specified by [-bound, bound] in dims dimensions
-    symm_bounds = dims * [[-bound,bound]]
-
-    # simultaneously initialises expectation and normalisation integrals
-    expinteg = vegas.Integrator(symm_bounds)
-    norminteg = vegas.Integrator(symm_bounds)
-
-    # adapt to the integrands; discard results
-    expinteg(expec, nitn=5, neval=1000)
-    norminteg(norm,nitn=5, neval=1000)
-    # do the final integrals
-    expresult = expinteg(expec, nitn=10, neval=iters[indx])
-    normresult = norminteg(norm, nitn=10, neval=iters[indx])
-
-    if not OPTIM:
-        E = expresult.mean/normresult.mean
-    else:
-        E = expresult[0].mean/ normresult[0].mean
-#    print('Energy is {} when alpha is {}'.format(E, alpha), ' with sdev = ', [expresult.sdev, normresult.sdev])
-
-
-    final_results['energy'] = E
-    final_results['dev'] = [expresult.sdev, normresult.sdev]
-    final_results['pvalue'] = [expresult.Q, normresult.Q]
-#        print(E)
-    print("--- Iteration time: %s seconds ---" % (time.time() - start_time))
-    return E
+    opt =[]  
+    def main(alpha):
+        if len(alpha) == 1: 
+            global alpha0
+            alpha0 = alpha[0]
+        if len(alpha) == 2: 
+            global alpha1
+            alpha1 = alpha[1]
+        if len(alpha) == 3: 
+            global alpha2
+            alpha2 = alpha[2]
     
-for i in range(N):
-    print(indx, i)
-#    start_time = time.time()
-    result = fmin(main, [2, 0.15], ftol = 0.1, xtol = 0.01, full_output=1, disp=1)
-    twop_energy.append(result[1])
+        start_time = time.time()
+        # assign integration volume to integrator
+        bound = 8
+        dims = 6
+        # creates symmetric bounds specified by [-bound, bound] in dims dimensions
+        symm_bounds = dims * [[-bound,bound]]
     
-dur = time.time() - start_time
-print("--- Iteration time: %s seconds ---" % (dur))
-twopara_energy[:,indx] = twop_energy
+        # simultaneously initialises expectation and normalisation integrals
+        expinteg = vegas.Integrator(symm_bounds)
+        norminteg = vegas.Integrator(symm_bounds)
+    
+        # adapt to the integrands; discard results
+        expinteg(expec, nitn=5, neval=1000)
+        norminteg(norm,nitn=5, neval=1000)
+        # do the final integrals
+        expresult = expinteg(expec, nitn=10, neval=iters[indx])
+        normresult = norminteg(norm, nitn=10, neval=iters[indx])
+    
+        if not OPTIM:
+            E = expresult.mean/normresult.mean
+        else:
+            E = expresult[0].mean/ normresult[0].mean
 
-#%%
-##########
-### Save data into a csv
-#n = '1e5'
+        print("--- Iteration time: %s seconds ---" % (time.time() - start_time))
+        return E
+        
+    for i in range(N):
+        print(indx, i)
+    #    start_time = time.time()
+        result = fmin(main, [2, 0.15], ftol = 0.1, xtol = 0.01, full_output=1, disp=1)
+        energy.append(result[1])
+        
+    dur = time.time() - start_time
+    print("--- Total time: %s seconds ---" % (dur))
+    data_arr[:,indx] = energy
+    
+    return data_arr
+
+def save_energy(data_arr, name):
+    ''' Save data and processed data into a csv
+    '''
+    np.savetxt('%s.csv' %name, (data_arr), 
+           fmt = '%s', delimiter=',', header = (name+ str(iters)))
+
+    ### Process data and save into csv
+    eavg = np.mean(data_arr, 0)
+    estd = np.std(data_arr, 0)
+
+    np.savetxt('%s.csv' %name+'_processed', (np.transpose([iters, eavg, estd])), 
+               fmt = '%s', delimiter=',', header = (name+ 'iters, eavg, estd'))
+
+### Main code
+iters = [1e4, 5e4, 1e5, 5e5, 1e6]
+N = 10
+indx = 0
+twopara_energy= np.zeros((N, len(iters)))
+two_para_energy = iterplot(twopara_energy, N, iters, indx)
+
 name = 'vegas_2param_iters'
-np.savetxt('%s.csv' %name, (twopara_energy_backup), 
-           fmt = '%s', delimiter=',', header = (name))
+#save_energy(two_para_energy, name)
+
 
