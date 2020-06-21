@@ -87,7 +87,7 @@ def metropolis_hastings(pfunc, iter, alpha, dims):
 
 
 @njit
-def integrator_mcmc(pfunc, qfunc, sample_iter, walkers, alpha, dims, verbose):
+def integrator_mcmc(pfunc, qfunc, sample_iter, walkers, alpha, dims, verbose = True):
 
     therm = 0
     vals = np.zeros(walkers)

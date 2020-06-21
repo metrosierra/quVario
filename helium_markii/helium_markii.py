@@ -116,7 +116,7 @@ class Noble():
         return temp
 
     def grad_descent(self, function, guess):
-        temp = self.mini.gradient(func = function, guess = guess, tolerance = 0.0005)
+        temp = self.mini.gradient(func = function, guess = guess, tolerance = 0.001)
         return temp
 
     def stability_protocol(self, fixedpoint, iterations):
@@ -148,14 +148,20 @@ class Noble():
 @njit
 def jit_grad_des(func, guess, tolerance):
 
+    cycle_count = 0
     position0 = guess
-    ep = 0.000000001
+    ep = 0.00000001
     step = 0.2
     step_ratio = 0.5
     epsilons = np.identity(len(guess))*ep
     delta1 = 10.
+    satisfied = False
+    point_collection = []
 
-    while abs(delta1) > tolerance:
+
+    while satisfied == False:
+        cycle_count+=1
+        print('Cycle', cycle_count)
         value1 = func(pfunc, qfunc, sample_iter = 10000, walkers = 40, alpha = position0, dims = 6)[0]
 
         vector = np.zeros(len(guess))
@@ -178,20 +184,33 @@ def jit_grad_des(func, guess, tolerance):
             delta1 = delta2
             value2 = value3
 
-    return value2, position0
+        point_collection.append(value2)
+        if convergence == 'strict':
+            satisfied = abs(delta1) < tolerance
+            finalvalue = value2
+
+        elif convergence == 'fuzzy':
+            if len(point_collection) >= 5:
+                data_set = point_collection[-5:]
+                print('std', statistics.pstdev(data_set))
+                print('mean', statistics.mean(data_set))
+                satisfied = abs(statistics.pstdev(data_set)/statistics.mean(data_set)) < tolerance
+                finalvalue = statistics.mean(data_set)
+
+    print('Convergence sucess!')
+    return finalvalue, position0
 
 
 
 n = Noble(evals = 10000, iters = 40, verbose = False)
 # n.stability_protocol(np.array([1.9, 2.0, 0.2]), 100)
-start = time.time()
 temp =[]
 for i in range(100):
-
+    start = time.time()
     result = n.grad_descent(n.monte_metro, np.array([1.6, 2.0, 0.2]))
     temp.append(result[0])
+    print(time.time() - start)
 
-print(time.time() - start)
 
 
 
