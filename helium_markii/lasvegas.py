@@ -18,8 +18,8 @@ import matplotlib.pyplot as plt
 #from optipack import MiniMiss, integrator_mcmc, metropolis_hastings, mcmc_q, mcmc_p
 import psiham
 
-psilet_args = {'electrons': 2, 'alphas': 2, 'coordsys': 'cartesian'}
-ham = psiham.HamLet(trial_expr = 'twopara1', **psilet_args)
+psilet_args = {'electrons': 2, 'alphas': 3, 'coordsys': 'cartesian'}
+ham = psiham.HamLet(trial_expr = 'threepara1', **psilet_args)
 variables, expr = ham.he_expect()
 temp1 = ham.vegafy(expr, coordinates = variables, name = 'expec')
 
@@ -32,47 +32,47 @@ final_results = {}
 
 #SHOW_GRID = False
 #OPTIM = True
-#def main(alpha):
-#
-#    global alpha0
-##    global alpha1
-##    global alpha2
-#    alpha0 = alpha[0]
-##    alpha1 = alpha[1]
-##    alpha2 = alpha[2]
-#
-#    start_time = time.time()
-#
-#    # assign integration volume to integrator
-#    bound = 8
-#    dims = 6
-#    # creates symmetric bounds specified by [-bound, bound] in dims dimensions
-#    symm_bounds = dims * [[-bound,bound]]
-#
-#    # simultaneously initialises expectation and normalisation integrals
-#    expinteg = vegas.Integrator(symm_bounds)
-#    norminteg = vegas.Integrator(symm_bounds)
-#
-#    # adapt to the integrands; discard results
-#    expinteg(expec, nitn=5, neval=1000)
-#    norminteg(norm,nitn=5, neval=1000)
-#    # do the final integrals
-#    expresult = expinteg(expec, nitn=10, neval=100000)
-#    normresult = norminteg(norm, nitn=10, neval=100000)
-#
-#
-#    if not OPTIM:
-#        E = expresult.mean/normresult.mean
-#    else:
-#        E = expresult[0].mean/ normresult[0].mean
-##    print('Energy is {} when alpha is {}'.format(E, alpha), ' with sdev = ', [expresult.sdev, normresult.sdev])
-##    print("--- Iteration time: %s seconds ---" % (time.time() - start_time))
-#
-#    final_results['energy'] = E
-#    final_results['dev'] = [expresult.sdev, normresult.sdev]
-#    final_results['pvalue'] = [expresult.Q, normresult.Q]
-#
-#    return E
+def main(alpha):
+
+    global alpha0
+#    global alpha1
+#    global alpha2
+    alpha0 = alpha[0]
+#    alpha1 = alpha[1]
+#    alpha2 = alpha[2]
+
+    start_time = time.time()
+
+    # assign integration volume to integrator
+    bound = 8
+    dims = 6
+    # creates symmetric bounds specified by [-bound, bound] in dims dimensions
+    symm_bounds = dims * [[-bound,bound]]
+
+    # simultaneously initialises expectation and normalisation integrals
+    expinteg = vegas.Integrator(symm_bounds)
+    norminteg = vegas.Integrator(symm_bounds)
+
+    # adapt to the integrands; discard results
+    expinteg(expec, nitn=5, neval=1000)
+    norminteg(norm,nitn=5, neval=1000)
+    # do the final integrals
+    expresult = expinteg(expec, nitn=10, neval=100000)
+    normresult = norminteg(norm, nitn=10, neval=100000)
+
+
+    if not OPTIM:
+        E = expresult.mean/normresult.mean
+    else:
+        E = expresult[0].mean/ normresult[0].mean
+#    print('Energy is {} when alpha is {}'.format(E, alpha), ' with sdev = ', [expresult.sdev, normresult.sdev])
+#    print("--- Iteration time: %s seconds ---" % (time.time() - start_time))
+
+    final_results['energy'] = E
+    final_results['dev'] = [expresult.sdev, normresult.sdev]
+    final_results['pvalue'] = [expresult.Q, normresult.Q]
+
+    return E
 #
 #### Optimisation ALgorithm
 #start_time = time.time()
@@ -490,66 +490,63 @@ final_results = {}
 
 #twopara_energy_new = np.zeros((10,1))
 #twopara_energy_backup_2 = twopara_energy.copy()
+threepara_energy= np.zeros((N, len(iters)))
 #%%
 energy = []
 
-def main(alpha):
-#    global alpha0
-#    alpha0 = alpha[0]
-#    global alpha1
-#    alpha1 = alpha[1]
-    if len(alpha) >= 1: 
-        global alpha0
-        alpha0 = alpha[0]
-    if len(alpha) >= 2: 
-        global alpha1
-        alpha1 = alpha[1]
-    if len(alpha) == 3: 
-        global alpha2
-        alpha2 = alpha[2]
-
-    start_time = time.time()
-    # assign integration volume to integrator
-    bound = 8
-    dims = 6
-    # creates symmetric bounds specified by [-bound, bound] in dims dimensions
-    symm_bounds = dims * [[-bound,bound]]
-
-    # simultaneously initialises expectation and normalisation integrals
-    expinteg = vegas.Integrator(symm_bounds)
-    norminteg = vegas.Integrator(symm_bounds)
-
-    # adapt to the integrands; discard results
-    expinteg(expec, nitn=5, neval=1000)
-    norminteg(norm,nitn=5, neval=1000)
-    # do the final integrals
-    expresult = expinteg(expec, nitn=10, neval=iters[indx])
-    normresult = norminteg(norm, nitn=10, neval=iters[indx])
-
-
-    E = expresult.mean/normresult.mean
-
-    print(alpha, E)
-    print("--- Iteration time: %s seconds ---" % (time.time() - start_time))
-    return E
+#def main(alpha):
+##    global alpha0
+##    alpha0 = alpha[0]
+##    global alpha1
+##    alpha1 = alpha[1]
+#    if len(alpha) >= 1: 
+#        global alpha0
+#        alpha0 = alpha[0]
+#    if len(alpha) >= 2: 
+#        global alpha1
+#        alpha1 = alpha[1]
+#    if len(alpha) == 3: 
+#        global alpha2
+#        alpha2 = alpha[2]
+#
+#    start_time = time.time()
+#    # assign integration volume to integrator
+#    bound = 8
+#    dims = 6
+#    # creates symmetric bounds specified by [-bound, bound] in dims dimensions
+#    symm_bounds = dims * [[-bound,bound]]
+#
+#    # simultaneously initialises expectation and normalisation integrals
+#    expinteg = vegas.Integrator(symm_bounds)
+#    norminteg = vegas.Integrator(symm_bounds)
+#
+#    # adapt to the integrands; discard results
+#    expinteg(expec, nitn=5, neval=1000)
+#    norminteg(norm,nitn=5, neval=1000)
+#    # do the final integrals
+#    expresult = expinteg(expec, nitn=10, neval=iters[indx])
+#    normresult = norminteg(norm, nitn=10, neval=iters[indx])
+#
+#
+#    E = expresult.mean/normresult.mean
+#
+#    print(alpha, E)
+#    print("--- Iteration time: %s seconds ---" % (time.time() - start_time))
+#    return E
     
 def iterplot(data_arr, N, iters, indx):
-    start_time = time.time()
+    s_time = time.time()
     opt =[]  
     def main(alpha):
-        global alpha0
-        alpha0 = alpha[0]
-        global alpha1
-        alpha1 = alpha[1]
-#        if len(alpha) == 1: 
-#            global alpha0
-#            alpha0 = alpha[0]
-#        if len(alpha) == 2: 
-#            global alpha1
-#            alpha1 = alpha[1]
-#        if len(alpha) == 3: 
-#            global alpha2
-#            alpha2 = alpha[2]
+        if len(alpha) >= 1: 
+            global alpha0
+            alpha0 = alpha[0]
+        if len(alpha) >= 2: 
+            global alpha1
+            alpha1 = alpha[1]
+        if len(alpha) == 3: 
+            global alpha2
+            alpha2 = alpha[2]
     
         start_time = time.time()
         # assign integration volume to integrator
@@ -569,7 +566,6 @@ def iterplot(data_arr, N, iters, indx):
         expresult = expinteg(expec, nitn=10, neval=iters[indx])
         normresult = norminteg(norm, nitn=10, neval=iters[indx])
     
-
         E = expresult.mean/normresult.mean
 
         print(alpha, E)
@@ -578,11 +574,13 @@ def iterplot(data_arr, N, iters, indx):
         
     for i in range(N):
         print(indx, i)
+        repeat_time = time.time()
     #    start_time = time.time()
-        result = fmin(main, [22, 1], ftol = 0.1, xtol = 0.01, full_output=1, disp=1)
+        result = fmin(main, [2, 1.6, 0.15], ftol = 0.1, xtol = 0.01, full_output=1, disp=1)
         energy.append(result[1])
+        print("--- Iteration time: %s seconds ---" % (time.time() - repeat_time))
         
-    dur = time.time() - start_time
+    dur = time.time() - s_time
     print("--- Total time: %s seconds ---" % (dur))
     data_arr[:,indx] = energy
     
@@ -604,11 +602,61 @@ def save_energy(data_arr, name):
 ### Main code
 iters = [1e4, 5e4, 1e5, 5e5, 1e6]
 N = 10
-indx = 1
-twopara_energy= np.zeros((N, len(iters)))
-#two_para_energy = iterplot(twopara_energy, N, iters, indx)
+indx = 2
 
-name = 'vegas_2param_iters'
-#save_energy(two_para_energy, name)
+threepara_energy = iterplot(threepara_energy, N, iters, indx)
+#threepara_energy[:,0] = np.loadtxt(name+'.csv', usecols= 0)
+#%%
+#name = 'vegas_3param_iters'
+#save_energy(threepara_energy, name)
 
+#%%
 
+def getpdf(bound, alpha, absv = 0.4135889547408346):
+    @vegas.batchintegrand
+    def norm(x):
+        ''' Squared trial wavefunction, used as denominator for variational integral
+        '''
+    
+        r1_len = np.sqrt(x[:,0]**2 + x[:,1]**2 + x[:,2]**2)
+        r2_len = np.sqrt(x[:,3]**2 + x[:,4]**2 + x[:,5]**2)
+    
+        r12 = np.sqrt((x[:,0]-x[:,3])**2 + (x[:,1]-x[:,4])**2 + (x[:,2]-x[:,5])**2)
+    
+        psisq = (np.exp(-2 * r1_len)* np.exp(-2 * r2_len)
+                * np.exp(r12 / (2 * (1+ alpha*r12)))) ** 2
+        return psisq / absv 
+    
+    dims = 6
+    # creates symmetric bounds specified by [-bound, bound] in dims dimensions
+    symm_bounds = dims * [[-bound,bound]]
+    
+    # simultaneously initialises expectation and normalisation integrals
+    norminteg = vegas.Integrator(symm_bounds)
+    
+    # adapt to the integrands; discard results
+    norminteg(norm,nitn=5, neval=1000)
+    # do the final integrals
+    normresult = norminteg(norm, nitn=10, neval=1000000)
+    
+    norm = normresult.mean
+    return norm
+
+#%%
+#bound  = np.linspace(1,10, 30)
+#prob = [] 
+#
+#for i in bound:
+#    prob.append(getpdf(i, 0.155))
+#    
+#%%
+#plt.ylabel('probability located in 6 dimensional bound')
+#plt.xlabel('bound')
+#plt.grid()
+#plt.plot(bound, prob, label = 'one para with alpha=0.155' )
+#plt.legend()
+
+#%%
+#np.concatenate((bound, prob))
+##x = np.reshape()
+#np.savetxt('pdist.csv', np.array([bound, prob]).transpose(), delimiter= ',')
