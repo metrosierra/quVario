@@ -1,4 +1,4 @@
- #!/usr/bin/env python3
+#!/usr/bin/env python3
 
 # Made 2020, Mingsong Wu, Kenton Kwok
 # mingsongwu [at] outlook [dot] sg
@@ -16,7 +16,6 @@ from optipack import MiniMiss, LasVegas
 from optipack import integrator_mcmc, metropolis_hastings
 from optipack import Uint, Ueval
 import psiham
-from uniform import psiHpsi
 
 import matplotlib.pyplot as plt
 
@@ -107,7 +106,7 @@ class Noble():
         alpha1 = alpha[1]
         alpha2 = alpha[2]
 
-        temp = self.vegas.vegas_int(vega_expec, vega_pfunc, self.evals, self.iters, dimensions = self.dims, volumespan = 8.)
+        temp = self.vegas.vegas_int(vega_expec, vega_pfunc, self.evals, self.iters, dimensions = self.dims, volumespan = 8., verbose = self.verbose)
         return temp['energy']
 
     def nead_min(self, function, guess):
@@ -116,7 +115,7 @@ class Noble():
         return temp
 
     def grad_descent(self, function, guess):
-        temp = self.mini.gradient(func = function, guess = guess, tolerance = 0.001)
+        temp = self.mini.gradient(func = function, guess = guess, tolerance = 0.05)
         return temp
 
     def stability_protocol(self, fixedpoint, iterations):
@@ -202,20 +201,49 @@ def jit_grad_des(func, guess, tolerance):
 
 
 
-n = Noble(evals = 10000, iters = 40, verbose = False)
-# n.stability_protocol(np.array([1.9, 2.0, 0.2]), 100)
-temp =[]
-for i in range(100):
-    start = time.time()
-    result = n.grad_descent(n.monte_metro, np.array([1.6, 2.0, 0.2]))
-    temp.append(result[0])
-    print(time.time() - start)
+n = Noble(evals = 10000, iters = 10, verbose = False)
+
+
+
+evals = [10000, 50000, 100000, 500000, 1000000]
+paras = [2,1]
+guesses = [np.array([2.0,0.2]),  np.array([0.2])]
+trials = ['twopara1', 'onepara1']
+
+for x, para in enumerate(paras):
+    data = []
+    for i in evals:
+        n.evals = i
+        psilet_args = {'electrons': 2, 'alphas': para, 'coordsys': 'cartesian'}
+        n.ham = psiham.HamLet(trial_expr = trials[x], **psilet_args)
+        n.numba_pdf()
+        n.numba_expec()
+        e_min = n.nead_min(n.monte_uniform, guesses[x])[3][1]
+        data.append(np.array([e_min, n.std]))
+        print(data)
+        print('{} and {}'.format(para,i), 'done')
+    np.savetxt('__results__/processed/uniform_test/{}para_{}iterations_10avg.txt'.format(para, i), np.c_[np.array(data)])
+
+
+
+
+# # n.stability_protocol(np.array([1.9, 2.0, 0.2]), 100)
+# temp =[]
+# for i in range(100):
+#     start = time.time()
+#     result = n.grad_descent(n.monte_metro, np.array([1.6, 2.0, 0.2]))
+#     temp.append(result[0])
+#     print(time.time() - start)
 
 
 
 
 
 #%%%%%%%%%%%%%
+
+# print(np.mean(temp))
+# plt.hist(temp, bins = 15)
+
 # iterations = 100
 # np.savetxt('__results__/stability_study/mcmc_{}iterations.txt'.format(iterations), np.c_[np.array(temp0)])
 # np.savetxt('__results__/stability_study/uniform_{}iterations.txt'.format(iterations), np.c_[np.array(temp1)])

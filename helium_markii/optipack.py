@@ -135,7 +135,7 @@ def Uint(integrand, bounds, n, alpha):
 @njit
 def Ueval(normalisation, expectation, n, iters, alpha, dimensions):
     #initialise settings
-    domain = 2.
+    domain = 3.
     dims = dimensions
     #origin centered symmetrical volume
     bounds = []
@@ -173,7 +173,7 @@ class LasVegas():
     def __init__(self):
         print('LasVegas up for business!')
 
-    def vegas_int(self, expec, norm, evals, iter, dimensions, volumespan):
+    def vegas_int(self, expec, norm, evals, iter, dimensions, volumespan, verbose = True):
 
         self.final_results = {}
 
@@ -198,8 +198,9 @@ class LasVegas():
 
 
         E = expresult.mean/normresult.mean
-        print('Energy is {} when alpha is'.format(E), ' with sdev = ', [expresult.sdev, normresult.sdev])
-        print("--- Iteration time: %s seconds ---" % (time.time() - start_time))
+        if verbose:
+            print('Energy is {} when alpha is'.format(E), ' with sdev = ', [expresult.sdev, normresult.sdev])
+            print("--- Iteration time: %s seconds ---" % (time.time() - start_time))
 
         self.final_results['energy'] = E
         self.final_results['dev'] = [expresult.sdev, normresult.sdev]
@@ -241,8 +242,8 @@ class MiniMiss():
         print('\nGradient descent initiated, type of convergence selected as ' + convergence +'\n')
         cycle_count = 0
         position0 = guess
-        ep = 0.00000001
-        step = 0.2
+        ep = 0.000001
+        step = 0.1
         step_ratio = 0.5
         epsilons = np.identity(len(guess))*ep
         delta1 = 10.
@@ -282,12 +283,15 @@ class MiniMiss():
                 finalvalue = value2
 
             elif convergence == 'fuzzy':
-                if len(point_collection) >= 5:
-                    data_set = point_collection[-5:]
+                if len(point_collection) >= 10:
+                    data_set = point_collection[-10:]
                     print('std', statistics.pstdev(data_set))
                     print('mean', statistics.mean(data_set))
                     satisfied = abs(statistics.pstdev(data_set)/statistics.mean(data_set)) < tolerance
                     finalvalue = statistics.mean(data_set)
+            if cycle > 150:
+                print('Max iterations reached, did not converge according to tolerance!!')
+                break
 
         print('Convergence sucess!')
         return finalvalue, position0
@@ -298,4 +302,3 @@ class MiniMiss():
 
     def __exit__(self, e_type, e_val, traceback):
         print('\n\nMiniMiss object self-destructing\n\n')
-        
