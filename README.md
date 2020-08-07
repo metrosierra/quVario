@@ -1,37 +1,27 @@
-## Welcome to GitHub Pages
+## Welcome to quVario
 
-You can use the [editor on GitHub](https://github.com/Starryblack/quVario/edit/master/README.md) to maintain and preview the content for your website in Markdown files.
+This repository contains our attempt at coding a quantum variational method machine with Python3. The work is part of our Imperial College Physics Year 1 Summer Project. Due to the coronavirus, we were forced to choose a more computational project topic.
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+quVario is essentially a python ecosystem that can mathematically represent multi-electron (valance) atom system and find the system's ground state energy via the variational method. The integration techniques utilised range from deterministic quadrature methods to monte carlo methods. We can describe our iterative progress through two main prongs: Mark I (deterministic) and Mark II (monte carlo).
 
-### Markdown
-
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
+As of August 2020, the systems tested are the hydrogen and helium atoms.
+### Helium_marki
 
 ```markdown
-Syntax highlighted code block
 
-# Header 1
-## Header 2
-### Header 3
+- First attempt at quantum method of variation problem
+- Uses Sympy for symbolic differentiation
+- Used out of the box SciPy integration numerical methods (numerical differentiation too, for hydrogen test case)
 
-- Bulleted
-- List
-
-1. Numbered
-2. List
-
-**Bold** and _Italic_ and `Code` text
-
-[Link](url) and ![Image](src)
 ```
 
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
+### Helium_markii
 
-### Jekyll Themes
+```markdown
 
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/Starryblack/quVario/settings). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
+- Monte Carlo progression of Mark I, with ecosystem further developed:
+- psiham.py contains class objects that do the generation of the integrals (symbolic differentiation, algebra, etc.) in the form of a numba jit decorated function.
+- optipack.py contains the actual integration functions: uniform monte carlo, metropolis algorithm, VEGAS algorithm (to be cited)
+- psiham and optipack feeds helium_markii.py which does the actual execution.
 
-### Support or Contact
-
-Having trouble with Pages? Check out our [documentation](https://help.github.com/categories/github-pages-basics/) or [contact support](https://github.com/contact) and we’ll help you sort it out.
+```
